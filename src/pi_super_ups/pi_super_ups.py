@@ -8,7 +8,7 @@ from signal import pause
 from subprocess import check_call
 import time
 
-from ups_hat_device import UPSHatDevice
+from .ups_hat_device import UPSHatDevice
 
 
 I2C_BUS = 1
