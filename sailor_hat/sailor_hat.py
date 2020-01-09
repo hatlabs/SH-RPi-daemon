@@ -8,7 +8,7 @@ from signal import pause
 from subprocess import check_call
 import time
 
-from .ups_hat_device import UPSHatDevice
+from .sailor_hat_device import SailorHatDevice
 
 
 I2C_BUS = 1
@@ -79,11 +79,11 @@ def main():
 
     # TODO: should test that the device is responding and has correct firmware
 
-    dev = UPSHatDevice(i2c_bus, i2c_addr)
+    dev = SailorHatDevice(i2c_bus, i2c_addr)
 
     allowed_blackout_time = args.allowed_blackout_time
 
-    logger = logging.getLogger('pi_super_ups')
+    logger = logging.getLogger('sailor_hat')
     handler = logging.handlers.SysLogHandler(address='/dev/log')
     formatter = logging.Formatter('%(name)s[%(process)d]: %(message)s')
     handler.setFormatter(formatter)

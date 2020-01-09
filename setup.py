@@ -1,19 +1,19 @@
 from setuptools import setup, find_packages
 
-setup(name='pi_super_ups',
+setup(name='sailor_hat',
       version='0.2.0',
-      description='Super-capacitor UPS monitor for Raspberry Pi',
+      description='Sailor Hat for Raspberry Pi Daemon',
       author='Matti Airas',
       author_email='mairas@iki.fi',
-      url='https://github.com/mairas/pi-super-ups',
+      url='https://github.com/mairas/sailor-hat-daemon',
       packages=find_packages(),
-      py_modules=['pi_super_ups.ups_hat_device'],
+      py_modules=['sailor_hat.ups_hat_device'],
       install_requires=[
         'smbus2',
       ],
       entry_points = {
         'console_scripts': [
-          'pi-super-ups=pi_super_ups.pi_super_ups:main',
-          'hat-i2c-report=pi_super_ups.hat_i2c_report:main'],
+          'sailor-hat-daemon=sailor_hat.sailor_hat:main',
+          'hat-i2c-report=sailor_hat.hat_i2c_report:main'],
       }
 )

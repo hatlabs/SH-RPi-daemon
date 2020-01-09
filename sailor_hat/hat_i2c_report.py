@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from .ups_hat_device import UPSHatDevice
+from .sailor_hat_device import SailorHatDevice
 
 
 def main():
-    dev = UPSHatDevice(1, 0x6d)
+    dev = SailorHatDevice(1, 0x6d)
 
     hw_ver = dev.hardware_version()
     fw_ver = dev.firmware_version()
