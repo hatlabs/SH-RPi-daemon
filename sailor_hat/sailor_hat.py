@@ -33,10 +33,11 @@ def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
     state = "START"
     blackout_time = 0
     while True:
-        en5v_state = dev.en5v_state()
-        dev_state = dev.state()
+        # TODO: Provide facilities for reporting the states and voltages
+        # en5v_state = dev.en5v_state()
+        # dev_state = dev.state()
         dcin_voltage = dev.dcin_voltage()
-        supercap_voltage = dev.supercap_voltage()
+        # supercap_voltage = dev.supercap_voltage()
 
         if state=="START":
             dev.set_watchdog_timeout(10)

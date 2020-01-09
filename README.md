@@ -22,7 +22,7 @@ that the device is able to shut itself down in a controlled fashion.
 
 ## Installation
 
-The monitor script can be installed by issuing the following command:
+The daemon script can be installed by issuing the following command:
 
     sudo python3 setup.py install
 
@@ -39,5 +39,5 @@ Finally, to run the script automatically as a service, copy
 
 ## Usage
 
-To configure the monitor behavior, directly edit the script or service 
+To configure the daemon behavior, directly edit the script or service 
 files.
