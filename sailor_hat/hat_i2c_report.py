@@ -15,9 +15,6 @@ def main():
     en5v_state = dev.en5v_state()
     print("5V state: {}".format("on" if en5v_state else "off"))
 
-    enin_state = dev.enin_state()
-    print("ENIN state: {}".format("on" if enin_state else "off"))
-
     power_on_threshold = dev.power_on_threshold()
     power_off_threshold = dev.power_off_threshold()
 
