@@ -7,18 +7,19 @@ RATIO_COEFF = 2.7 / 256
 
 class States(Enum):
     BEGIN = 0
-    ENTER_POWER_ON_5V_OFF = 1
-    POWER_ON_5V_OFF = 2
-    ENTER_POWER_ON_5V_ON = 3
-    POWER_ON_5V_ON = 4
-    ENTER_POWER_OFF_5V_ON = 5
-    POWER_OFF_5V_ON = 6
-    ENTER_SHUTDOWN = 7
-    SHUTDOWN = 8
-    ENTER_WATCHDOG_REBOOT = 9
-    WATCHDOG_REBOOT = 10
-    ENTER_OFF = 11
-    OFF = 12
+    WAIT_FOR_POWER_ON = 1
+    ENTER_POWER_ON_5V_OFF = 2
+    POWER_ON_5V_OFF = 3
+    ENTER_POWER_ON_5V_ON = 4
+    POWER_ON_5V_ON = 5
+    ENTER_POWER_OFF_5V_ON = 6
+    POWER_OFF_5V_ON = 7
+    ENTER_SHUTDOWN = 8
+    SHUTDOWN = 9
+    ENTER_WATCHDOG_REBOOT = 10
+    WATCHDOG_REBOOT = 11
+    ENTER_OFF = 12
+    OFF = 13
 
 
 class SailorHatDevice:
@@ -44,9 +45,6 @@ class SailorHatDevice:
 
     def en5v_state(self):
         return self.i2c_query_byte(0x10)
-
-    def enin_state(self):
-        return self.i2c_query_byte(0x11)
 
     def power_on_threshold(self):
         return RATIO_COEFF * self.i2c_query_byte(0x13)
