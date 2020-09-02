@@ -7,13 +7,13 @@ setup(name='sailor_hat',
       author_email='mairas@iki.fi',
       url='https://github.com/mairas/sailor-hat-daemon',
       packages=find_packages(),
-      py_modules=['sailor_hat.ups_hat_device'],
+      py_modules=['sailor_hat.sailor_hat_device'],
       install_requires=[
         'smbus2',
       ],
       entry_points = {
         'console_scripts': [
           'sailor-hat-daemon=sailor_hat.sailor_hat:main',
-          'hat-i2c-report=sailor_hat.hat_i2c_report:main'],
+          'sailor-hat-i2c-report=sailor_hat.hat_i2c_report:main'],
       }
 )
