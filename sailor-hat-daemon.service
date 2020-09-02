@@ -1,5 +1,5 @@
 [Unit]
-Description=Sailor Hat for Raspberry Pi Daemon
+Description=Sailor Hat Daemon
 After=syslog.target
 StartLimitIntervalSec=0
 
