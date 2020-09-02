@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-import atexit
 import logging
 import logging.handlers
 from signal import pause
 from subprocess import check_call
+import signal
+import sys
 import time
 
 from .sailor_hat_device import SailorHatDevice
@@ -14,7 +15,7 @@ from .sailor_hat_device import SailorHatDevice
 I2C_BUS = 1
 I2C_ADDR = 0x6d
 
-ALLOWED_BLACKOUT_TIME = 5.0
+ALLOWED_BLACKOUT_TIME = 3.0
 
 BLACKOUT_VOLTAGE_LIMIT = 10.0
 
@@ -91,12 +92,14 @@ def main():
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
-    def cleanup():
+    def cleanup(signum, frame):
+        logger.info("Disabling Sailor Hat watchdog")
         dev.set_watchdog_timeout(0)
-        pass
+        sys.exit(0)
 
-    atexit.register(cleanup)
-
+    signal.signal(signal.SIGINT, cleanup)
+    signal.signal(signal.SIGTERM, cleanup)
+    
     run_state_machine(logger, dev, allowed_blackout_time)
 
 
