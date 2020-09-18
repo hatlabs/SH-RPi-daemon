@@ -3,7 +3,8 @@ from enum import Enum
 from smbus2 import SMBus
 
 RATIO_COEFF = 2.7 / 256
-
+DCIN_MAX = 32.0
+VCAP_MAX = 2.8
 
 class States(Enum):
     BEGIN = 0
@@ -56,12 +57,10 @@ class SailorHatDevice:
         return States(self.i2c_query_byte(0x15)).name
 
     def dcin_voltage(self):
-        # 12.22V
-        return 15.76*self.i2c_query_byte(0x20)/256
+        return DCIN_MAX*self.i2c_query_byte(0x20)/256
 
     def supercap_voltage(self):
-        # 2.57V
-        return 2.7*self.i2c_query_byte(0x21)/256
+        return VCAP_MAX*self.i2c_query_byte(0x21)/256
 
     def request_shutdown(self):
         self.i2c_write_byte(0x30, 0x01)
