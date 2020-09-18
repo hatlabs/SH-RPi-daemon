@@ -2,7 +2,7 @@ from enum import Enum
 
 from smbus2 import SMBus
 
-RATIO_COEFF = 2.7 / 256
+RATIO_COEFF = 2.8 / 256
 DCIN_MAX = 32.0
 VCAP_MAX = 2.8
 
