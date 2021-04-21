@@ -1,0 +1,7 @@
+version: '2'
+services:
+    sailor_hat_daemon:
+        container_name: sailor_hat_daemon
+        image: mairas/sailor_hat_daemon:latest
+        restart: unless-stopped
+        privileged: true
