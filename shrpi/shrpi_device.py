@@ -23,7 +23,7 @@ class States(Enum):
     OFF = 13
 
 
-class SailorHatDevice:
+class SHRPiDevice:
     def __init__(self, bus, addr):
         self.bus = bus
         self.addr = addr

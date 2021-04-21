@@ -1,5 +1,5 @@
 [Unit]
-Description=Sailor Hat Daemon
+Description=SH-RPi Daemon
 After=syslog.target
 StartLimitIntervalSec=0
 
@@ -8,7 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
-ExecStart=/usr/local/bin/sailor-hat-daemon
+ExecStart=/usr/local/bin/sh-rpi-daemon
 
 [Install]
 WantedBy=multi-user.target
