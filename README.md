@@ -21,19 +21,18 @@ controller board for marine and automotive use. The main features are:
 
 The main use case for the script is to have the board powered via a supercapacitor. If the power for the board is disconnected, the supercap is able to supply sufficient power that the device is able to shut itself down in a controlled fashion.
 
+SH-RPi includes an MCP2515 can controller that communicates with the Raspberry Pi using SPI. To allow simultaneous use of other SPI-enabled hats, SH-RPi uses custom SPI GPIO pins. These pins need to be enabled using a custom device tree overlay. This is automatically installed using the instructions below.
+
 ## Installation
 
-The daemon script can be installed by issuing the following command:
+A fully automated installation script is provided. The script is tested on newly flashed Raspberry Pi OS and might fail on a heavily modified system. Installation has not been tested on any other operating systems.
 
-    sudo python3 setup.py install
+To run the automated installation script, copy-paste the following command onto the Raspberry Pi command prompt:
 
-It is assumed that the daemon can call `poweroff` using `sudo` without a password prompt. This is normally the case on the Raspberry Pi if the `pi` user is used. If not, give your preferred user permissions to call `poweroff` without a password by running `sudo visudo` and adding the following line:
+    curl -L \
+        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/SH-RPi/install.sh \
+        | sudo bash
 
-    pi ALL = NOPASSWD: /sbin/poweroff
+The command will fetch the installation script and execute it automatically.
 
-Finally, to run the script automatically as a service, copy
-`sh-rpi-daemon.service` to `/lib/systemd/system`. Once the file is in place, issue the following commands:
-
-    systemctl daemon-reload
-    systemctl enable sh-rpi-daemon
-    systemctl start sh-rpi-daemon
+Manual installation is also possible. If you prefer to do that, follow the steps taken in `install.sh` and `overlays/Makefile`.
