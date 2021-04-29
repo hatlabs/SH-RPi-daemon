@@ -1,19 +1,19 @@
 from setuptools import setup, find_packages
 
-setup(name='sailor_hat',
-      version='0.2.0',
+setup(name='sh-rpi-daemon',
+      version='0.3.0',
       description='Sailor Hat for Raspberry Pi Daemon',
       author='Matti Airas',
-      author_email='mairas@iki.fi',
-      url='https://github.com/mairas/sailor-hat-daemon',
+      author_email='matti.airas@hatlabs.fi',
+      url='https://github.com/hatlabs/SH-RPi-daemon',
       packages=find_packages(),
-      py_modules=['sailor_hat.sailor_hat_device'],
+      py_modules=['shrpi.shrpi_device'],
       install_requires=[
         'smbus2',
       ],
       entry_points = {
         'console_scripts': [
-          'sailor-hat-daemon=sailor_hat.sailor_hat:main',
-          'sailor-hat-i2c-report=sailor_hat.hat_i2c_report:main'],
+          'sh-rpi-daemon=shrpi.shrpi:main',
+          'sh-rpi-i2c-report=shrpi.shrpi_i2c_report:main'],
       }
 )

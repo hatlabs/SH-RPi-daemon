@@ -9,7 +9,7 @@ import signal
 import sys
 import time
 
-from .sailor_hat_device import SailorHatDevice
+from .shrpi_device import SHRPiDevice
 
 
 I2C_BUS = 1
@@ -81,7 +81,7 @@ def main():
 
     # TODO: should test that the device is responding and has correct firmware
 
-    dev = SailorHatDevice(i2c_bus, i2c_addr)
+    dev = SHRPiDevice(i2c_bus, i2c_addr)
 
     allowed_blackout_time = args.allowed_blackout_time
 

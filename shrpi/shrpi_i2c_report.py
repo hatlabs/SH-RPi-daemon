@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-from .sailor_hat_device import SailorHatDevice
+from .shrpi_device import SHRPiDevice
 
 
 def main():
-    dev = SailorHatDevice(1, 0x6d)
+    dev = SHRPiDevice(1, 0x6d)
 
     hw_ver = dev.hardware_version()
     fw_ver = dev.firmware_version()
