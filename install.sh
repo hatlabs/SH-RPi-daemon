@@ -11,15 +11,15 @@ shopt -s inherit_errexit
 
 # Allow customization of the repository URL and branch
 
-REPOURL=$1
-BRANCH=$2
+REPOURL="${1-}"
+BRANCH="${2-}"
 
 if [ -z "$REPOURL" ] ; then
     REPOURL="https://github.com/hatlabs/SH-RPi-daemon"
 fi
 
 if [ -z "$BRANCH" ] ; then
-    BRANCH="master"
+    BRANCH="main"
 fi
 
 # create a temporary directory for the installation
