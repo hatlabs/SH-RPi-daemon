@@ -30,7 +30,7 @@ A fully automated installation script is provided. The script is tested on newly
 To run the automated installation script, copy-paste the following command onto the Raspberry Pi command prompt:
 
     curl -L \
-        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/SH-RPi/install.sh \
+        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install.sh \
         | sudo bash
 
 The command will fetch the installation script and execute it automatically.
