@@ -2,9 +2,9 @@ from enum import Enum
 
 from smbus2 import SMBus
 
-RATIO_COEFF = 2.8 / 256
-DCIN_MAX = 32.0
-VCAP_MAX = 2.8
+VCAP_MAX = 2.75
+RATIO_COEFF = VCAP_MAX / 256
+DCIN_MAX = 32.1
 
 class States(Enum):
     BEGIN = 0
