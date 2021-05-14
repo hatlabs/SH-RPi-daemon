@@ -2,7 +2,7 @@
 
 ## Introduction
 
-[Sailor Hat for Raspberry Pi](https://github.com/hatlabs/SH-RPi-hardware)
+[Sailor Hat for Raspberry Pi](https://hatlabs.github.io/sh-rpi/)
 is a Raspberry Pi power management and CAN bus
 controller board for marine and automotive use. The main features are:
 
@@ -36,3 +36,7 @@ To run the automated installation script, copy-paste the following command onto 
 The command will fetch the installation script and execute it automatically.
 
 Manual installation is also possible. If you prefer to do that, follow the steps taken in `install.sh` and `overlays/Makefile`.
+
+## Getting the hardware
+
+Sh-RPi devices are available for purchase at [hatlabs.fi](https://hatlabs.fi/).
