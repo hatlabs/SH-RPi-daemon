@@ -1,7 +1,0 @@
---- modules.orig	2021-04-21 15:41:29.910343076 +0100
-+++ modules	2021-04-21 15:41:40.960251265 +0100
-@@ -3,3 +3,4 @@
- # This file contains the names of kernel modules that should be loaded
- # at boot time, one per line. Lines beginning with "#" are ignored.
-
-+i2c-dev
