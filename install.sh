@@ -34,6 +34,12 @@ curl -L \
 unzip SH-RPi-daemon-${BRANCH}.zip
 cd SH-RPi-daemon-${BRANCH}
 
+# install the device tree overlay and other configuration files
+
+pushd configs
+./install_configs.sh
+popd
+
 # install the daemon build dependencies
 
 apt install -y python3-setuptools
@@ -47,16 +53,3 @@ python3 setup.py install
 install -o root sh-rpi-daemon.service /lib/systemd/system
 systemctl daemon-reload
 systemctl enable sh-rpi-daemon
-
-# install the device tree overlay and other configuration files
-
-cd overlays
-make install
-
-# report the results
-
-echo "*** ***"
-echo "Installation finished. If you have any rejected patches"
-echo "in the above output, you need to check that I2C and SPI are"
-echo "enabled and that /boot/config.txt has a section specific"
-echo "for SH-RPi-daemon."

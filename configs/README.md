@@ -3,8 +3,5 @@
 This directory contains the required custom device tree overlay files and configuration file changes for using SH-RPi. 
 The files can be installed by applying the following command:
 
-    sudo make install
+    sudo ./install_configs.sh
 
-Changes can be uninstalled with the following:
-
-    sudo make uninstall
