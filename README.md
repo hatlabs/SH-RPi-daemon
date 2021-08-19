@@ -35,7 +35,8 @@ To run the automated installation script, copy-paste the following command onto 
 
 The command will fetch the installation script and execute it automatically.
 
-Manual installation is also possible. If you prefer to do that, follow the steps taken in `install.sh` and `configs/install_configs.sh`.
+Manual installation is also possible. If you prefer to do that, follow the [Software installation instructions](https://hatlabs.github.io/sh-rpi/pages/software/) on the documentation website.
+
 
 ## SH-RPi documentation
 
