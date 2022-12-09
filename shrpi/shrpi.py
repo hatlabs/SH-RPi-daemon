@@ -85,7 +85,7 @@ def main():
 
     allowed_blackout_time = args.allowed_blackout_time
 
-    logger = logging.getLogger('sailor_hat')
+    logger = logging.getLogger('sh_rpi')
     handler = logging.handlers.SysLogHandler(address='/dev/log')
     formatter = logging.Formatter('%(name)s[%(process)d]: %(message)s')
     handler.setFormatter(formatter)
@@ -93,7 +93,7 @@ def main():
     logger.setLevel(logging.INFO)
 
     def cleanup(signum, frame):
-        logger.info("Disabling Sailor Hat watchdog")
+        logger.info("Disabling SH-RPi watchdog")
         dev.set_watchdog_timeout(0)
         sys.exit(0)
 
