@@ -33,6 +33,11 @@ def parse_arguments():
 def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
     state = "START"
     blackout_time = 0
+
+    # poll hardware and firmware versions
+    dev.hardware_version()
+    dev.firmware_version()
+
     while True:
         # TODO: Provide facilities for reporting the states and voltages
         # en5v_state = dev.en5v_state()
