@@ -63,7 +63,7 @@
                 pinctrl-0 = <&can2_pins>;
                 spi-max-frequency = <10000000>;
                 interrupt-parent = <&gpio>;
-                interrupts = <5 0x2>;
+                interrupts = <5 8>; /* IRQF_TRIGGER_LOW */
                 clocks = <&can2_osc>;
             };
         };
