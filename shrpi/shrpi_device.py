@@ -6,7 +6,8 @@ from smbus2 import SMBus
 VCAP_MAX = 9.35
 DCIN_MAX = 32.1
 I_MAX = 2.5
-TEMP_MAX = 512.
+TEMP_MAX = 512.0
+
 
 class States(Enum):
     BEGIN = 0
@@ -39,19 +40,19 @@ class SHRPiDevice:
 
     def i2c_query_byte(self, reg):
         with SMBus(self.bus) as bus:
-            #bus.write_byte(self.addr, reg)
+            # bus.write_byte(self.addr, reg)
             b = bus.read_byte_data(self.addr, reg)
         return b
 
     def i2c_query_bytes(self, reg, n):
         with SMBus(self.bus) as bus:
-            #bus.write_byte(self.addr, reg)
+            # bus.write_byte(self.addr, reg)
             b = bus.read_i2c_block_data(self.addr, reg, n)
         return b
 
     def i2c_query_word(self, reg):
         with SMBus(self.bus) as bus:
-            #bus.write_byte(self.addr, reg)
+            # bus.write_byte(self.addr, reg)
             buf = bus.read_i2c_block_data(self.addr, reg, 2)
             w = buf[0] << 8 | buf[1]
         return w
@@ -62,7 +63,7 @@ class SHRPiDevice:
 
     def i2c_write_word(self, reg, val):
         with SMBus(self.bus) as bus:
-            buf = [(val >> 8), val & 0xff]
+            buf = [(val >> 8), val & 0xFF]
             bus.write_i2c_block_data(self.addr, reg, buf)
 
     def i2c_write_bytes(self, reg, vals):
@@ -78,31 +79,31 @@ class SHRPiDevice:
             self.read_analog = self.read_analog_word
 
     def read_analog_byte(self, reg, scale):
-        return scale*self.i2c_query_byte(reg)/256
+        return scale * self.i2c_query_byte(reg) / 256
 
     def read_analog_word(self, reg, scale):
-        return scale*self.i2c_query_word(reg)/65536
+        return scale * self.i2c_query_word(reg) / 65536
 
     def hardware_version(self):
         legacy_version = self.i2c_query_byte(0x01)
-        if legacy_version != 0xff:
+        if legacy_version != 0xFF:
             version_string = f"1.0.{legacy_version}"
         else:
             bytes = self.i2c_query_bytes(0x03, 4)
             version_string = f"{bytes[0]}.{bytes[1]}.{bytes[2]}"
-            if bytes[3] != 0xff:
+            if bytes[3] != 0xFF:
                 version_string += f"-{bytes[3]}"
         self._set_hardware_version(version_string)
         return version_string
 
     def firmware_version(self):
         legacy_version = self.i2c_query_byte(0x02)
-        if legacy_version != 0xff:
+        if legacy_version != 0xFF:
             version_string = f"1.0.{legacy_version}"
         else:
             bytes = self.i2c_query_bytes(0x04, 4)
             version_string = f"{bytes[0]}.{bytes[1]}.{bytes[2]}"
-            if bytes[3] != 0xff:
+            if bytes[3] != 0xFF:
                 version_string += f"-{bytes[3]}"
         self._set_firmware_version(version_string)
         return version_string
@@ -113,9 +114,9 @@ class SHRPiDevice:
     def set_watchdog_timeout(self, timeout):
         """Set the watchdog timeout in seconds. 0 disables the watchdog."""
         if self.firmware_version.startswith("2."):
-            self.i2c_write_word(0x12, int(1000*timeout))
+            self.i2c_write_word(0x12, int(1000 * timeout))
         else:
-            self.i2c_write_byte(0x12, int(10*timeout))
+            self.i2c_write_byte(0x12, int(10 * timeout))
 
     def power_on_threshold(self):
         return self.read_analog(0x13, VCAP_MAX)
@@ -154,5 +155,3 @@ class SHRPiDevice:
 
     def watchdog_elapsed(self):
         return 0.1 * self.i2c_query_byte(0x16)
-    
-

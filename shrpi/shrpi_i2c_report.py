@@ -4,7 +4,7 @@ from shrpi.shrpi_device import SHRPiDevice
 
 
 def main():
-    dev = SHRPiDevice(1, 0x6d)
+    dev = SHRPiDevice(1, 0x6D)
 
     hw_ver = dev.hardware_version()
     fw_ver = dev.firmware_version()
@@ -26,13 +26,13 @@ def main():
     print("Hat state: {}".format(state))
 
     dcin_voltage = dev.dcin_voltage()
-    
+
     print("DCIN voltage: {}".format(dcin_voltage))
-    
+
     supercap_voltage = dev.supercap_voltage()
 
     print("Supercap voltage: {}".format(supercap_voltage))
-    
+
     input_current = dev.input_current()
 
     print("Input current: {}".format(input_current))
@@ -42,5 +42,6 @@ def main():
 
     print("MCU temperature: {}".format(temperature_C))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
