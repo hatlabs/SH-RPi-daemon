@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from .shrpi_device import SHRPiDevice
+from shrpi.shrpi_device import SHRPiDevice
 
 
 def main():
@@ -33,6 +33,14 @@ def main():
 
     print("Supercap voltage: {}".format(supercap_voltage))
     
+    input_current = dev.input_current()
+
+    print("Input current: {}".format(input_current))
+
+    temperature_K = dev.temperature()
+    temperature_C = temperature_K - 273.15
+
+    print("MCU temperature: {}".format(temperature_C))
 
 if __name__ == '__main__':
     main()

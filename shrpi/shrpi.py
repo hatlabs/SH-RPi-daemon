@@ -9,7 +9,7 @@ import signal
 import sys
 import time
 
-from .shrpi_device import SHRPiDevice
+from shrpi.shrpi_device import SHRPiDevice
 
 
 I2C_BUS = 1
