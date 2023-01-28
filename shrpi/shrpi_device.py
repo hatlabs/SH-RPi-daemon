@@ -113,7 +113,7 @@ class SHRPiDevice:
 
     def set_watchdog_timeout(self, timeout):
         """Set the watchdog timeout in seconds. 0 disables the watchdog."""
-        if self.firmware_version.startswith("2."):
+        if self._firmware_version.startswith("2."):
             self.i2c_write_word(0x12, int(1000 * timeout))
         else:
             self.i2c_write_byte(0x12, int(10 * timeout))
