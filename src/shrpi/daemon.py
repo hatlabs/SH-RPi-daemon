@@ -1,8 +1,6 @@
 
 import argparse
-import logging
-import logging.handlers
-from signal import pause
+from loguru import logger
 from subprocess import check_call
 import signal
 import sys
@@ -93,12 +91,6 @@ def main():
 
     dev = SHRPiDevice(i2c_bus, i2c_addr)
 
-    logger = logging.getLogger("sh_rpi")
-    handler = logging.handlers.SysLogHandler(address="/dev/log")
-    formatter = logging.Formatter("%(name)s[%(process)d]: %(message)s")
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.setLevel(logging.INFO)
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
 
