@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='sh-rpi-daemon',
-      version='0.3.0',
+      version='2.0.0',
       description='Sailor Hat for Raspberry Pi Daemon',
       author='Matti Airas',
       author_email='matti.airas@hatlabs.fi',

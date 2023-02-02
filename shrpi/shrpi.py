@@ -9,23 +9,25 @@ import signal
 import sys
 import time
 
-from .shrpi_device import SHRPiDevice
+from shrpi.shrpi_device import SHRPiDevice
 
 
 I2C_BUS = 1
-I2C_ADDR = 0x6d
+I2C_ADDR = 0x6D
 
 ALLOWED_BLACKOUT_TIME = 3.0
 
 BLACKOUT_VOLTAGE_LIMIT = 10.0
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--i2c-bus', type=int, default=I2C_BUS)
-    parser.add_argument('--i2c-addr', type=int, default=I2C_ADDR)
-    parser.add_argument('--allowed-blackout-time', type=float, 
-                        default=ALLOWED_BLACKOUT_TIME)
-    parser.add_argument('-n', default=False, action='store_true')
+    parser.add_argument("--i2c-bus", type=int, default=I2C_BUS)
+    parser.add_argument("--i2c-addr", type=int, default=I2C_ADDR)
+    parser.add_argument(
+        "--allowed-blackout-time", type=float, default=ALLOWED_BLACKOUT_TIME
+    )
+    parser.add_argument("-n", default=False, action="store_true")
 
     return parser.parse_args()
 
@@ -33,6 +35,16 @@ def parse_arguments():
 def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
     state = "START"
     blackout_time = 0
+
+    # Poll hardware and firmware versions. This will set SHRPiDevice in the
+    # correct mode.
+    hw_version = dev.hardware_version()
+    fw_version = dev.firmware_version()
+
+    logger.info(
+        "SH-RPi device detected; HW version %s, FW version %s", hw_version, fw_version
+    )
+
     while True:
         # TODO: Provide facilities for reporting the states and voltages
         # en5v_state = dev.en5v_state()
@@ -40,34 +52,35 @@ def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
         dcin_voltage = dev.dcin_voltage()
         # supercap_voltage = dev.supercap_voltage()
 
-        if state=="START":
+        if state == "START":
             dev.set_watchdog_timeout(10)
             if dcin_voltage < BLACKOUT_VOLTAGE_LIMIT:
                 logger.warn("Detected blackout on startup, ignoring")
             state = "OK"
-        elif state=="OK":
+        elif state == "OK":
             if dcin_voltage < BLACKOUT_VOLTAGE_LIMIT:
                 logger.warn("Detected blackout")
                 blackout_time = time.time()
                 state = "BLACKOUT"
-        elif state=="BLACKOUT":
+        elif state == "BLACKOUT":
             if dcin_voltage > BLACKOUT_VOLTAGE_LIMIT:
                 logger.info("Power resumed")
                 state = "OK"
-            elif time.time()-blackout_time > allowed_blackout_time:
+            elif time.time() - blackout_time > allowed_blackout_time:
                 # didn't get power back in time
-                logger.warn("Blacked out for {} s, shutting down"
-                                .format(allowed_blackout_time))
+                logger.warn(
+                    "Blacked out for {} s, shutting down".format(allowed_blackout_time)
+                )
                 state = "SHUTDOWN"
-        elif state=="SHUTDOWN":
+        elif state == "SHUTDOWN":
             if pretend_only:
                 logger.warn("Would execute /sbin/poweroff")
             else:
                 # inform the hat about this sad state of affairs
                 dev.request_shutdown()
-                check_call(['sudo', '/sbin/poweroff'])
+                check_call(["sudo", "/sbin/poweroff"])
             state = "DEAD"
-        elif state=="DEAD":
+        elif state == "DEAD":
             # just wait for the inevitable
             pass
         time.sleep(0.1)
@@ -85,23 +98,23 @@ def main():
 
     allowed_blackout_time = args.allowed_blackout_time
 
-    logger = logging.getLogger('sailor_hat')
-    handler = logging.handlers.SysLogHandler(address='/dev/log')
-    formatter = logging.Formatter('%(name)s[%(process)d]: %(message)s')
+    logger = logging.getLogger("sh_rpi")
+    handler = logging.handlers.SysLogHandler(address="/dev/log")
+    formatter = logging.Formatter("%(name)s[%(process)d]: %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
     def cleanup(signum, frame):
-        logger.info("Disabling Sailor Hat watchdog")
+        logger.info("Disabling SH-RPi watchdog")
         dev.set_watchdog_timeout(0)
         sys.exit(0)
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
-    
+
     run_state_machine(logger, dev, allowed_blackout_time)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
