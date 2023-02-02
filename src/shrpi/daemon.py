@@ -42,7 +42,7 @@ def run_state_machine(
     logger, dev, blackout_time_limit, blackout_voltage_limit, dry_run=False
 ):
     state = "START"
-    blackout_time = 0
+    blackout_time = 0.0
 
     # Poll hardware and firmware versions. This will set SHRPiDevice in the
     # correct mode.

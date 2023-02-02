@@ -30,8 +30,8 @@ class SHRPiDevice:
     def __init__(self, bus, addr):
         self.bus = bus
         self.addr = addr
-        self._hardware_version = None
-        self._firmware_version = None
+        self._hardware_version = "Unknown"
+        self._firmware_version = "Unknown"
         self.read_analog = self.read_analog_byte  # default to v1 protocol
 
     def i2c_query_byte(self, reg):
