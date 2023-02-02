@@ -38,6 +38,7 @@ shrpic = "shrpi.__main__:cli"
 [tool.poetry.dependencies]
 python = "^3.9"
 smbus2 = "^0.4.2"
+loguru = "^0.6.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.4"
