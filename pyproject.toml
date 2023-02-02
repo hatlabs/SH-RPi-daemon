@@ -138,7 +138,7 @@ addopts = [
 source = ["tests"]
 
 [coverage.paths]
-source = "shrpid"
+source = "src/shrpi"
 
 [coverage.run]
 branch = true
