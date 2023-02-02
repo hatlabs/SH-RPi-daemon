@@ -19,7 +19,7 @@ if [ -z "$REPOURL" ] ; then
 fi
 
 if [ -z "$BRANCH" ] ; then
-    BRANCH="main"
+    BRANCH="v1"
 fi
 
 # create a temporary directory for the installation
