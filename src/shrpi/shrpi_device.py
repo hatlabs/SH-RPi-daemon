@@ -1,8 +1,8 @@
 from enum import Enum
-import time
 
 from smbus2 import SMBus
 
+from shrpi.const import DCIN_MAX, I_MAX, TEMP_MAX, VCAP_MAX
 
 
 class States(Enum):
