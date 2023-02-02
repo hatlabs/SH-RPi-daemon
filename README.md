@@ -190,7 +190,32 @@ or install with `Poetry`
 poetry add shrpid
 ```
 
+## Using with Conda
 
+Conda users can setup a development environtment with ideas [stolen from Stack Overflow](https://stackoverflow.com/a/71110028/2999754).
+
+```bash
+conda create --name shrpid --file conda-linux-64.lock
+conda activate shrpid
+poetry install
+```
+
+and during regular use:
+
+```bash
+conda activate shrpid
+```
+
+Conda environment can be updated as follows:
+
+```bash
+# Re-generate Conda lock file(s) based on environment.yml
+conda-lock -k explicit --conda mamba
+# Update Conda packages based on re-generated lock file
+mamba update --file conda-linux-64.lock
+# Update Poetry packages and re-generate poetry.lock
+poetry update
+```
 
 ### Makefile usage
 
