@@ -1,7 +1,7 @@
 """Tests for hello function."""
 import pytest
 
-from shrpid.example import hello
+from shrpi.example import hello
 
 
 @pytest.mark.parametrize(
