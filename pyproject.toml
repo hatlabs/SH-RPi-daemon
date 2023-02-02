@@ -32,8 +32,8 @@ packages = [
 ]
 
 [tool.poetry.scripts]
-shrpid = "shrpid:__main__:daemon"
-shrpic = "shrpid:__main__:cli"
+shrpid = "shrpi.__main__:daemon"
+shrpic = "shrpi.__main__:cli"
 
 [tool.poetry.dependencies]
 python = "^3.9"
