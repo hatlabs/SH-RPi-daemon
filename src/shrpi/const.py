@@ -1,4 +1,3 @@
-
 # Default I2C bus for Raspberry Pi
 I2C_BUS = 1
 

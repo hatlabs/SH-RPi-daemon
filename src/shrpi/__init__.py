@@ -2,11 +2,7 @@
 """`shrpid` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation."""
 
 import sys
-
-if sys.version_info >= (3, 8):
-    from importlib import metadata as importlib_metadata
-else:
-    import importlib_metadata
+from importlib import metadata as importlib_metadata
 
 
 def get_version() -> str:

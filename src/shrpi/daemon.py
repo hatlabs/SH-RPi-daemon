@@ -1,12 +1,17 @@
-
 import argparse
-from loguru import logger
-from subprocess import check_call
 import signal
 import sys
 import time
-from shrpi.const import DEFAULT_BLACKOUT_TIME_LIMIT, DEFAULT_BLACKOUT_VOLTAGE_LIMIT, I2C_ADDR, I2C_BUS
+from subprocess import check_call
 
+from loguru import logger
+
+from shrpi.const import (
+    DEFAULT_BLACKOUT_TIME_LIMIT,
+    DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
+    I2C_ADDR,
+    I2C_BUS,
+)
 from shrpi.shrpi_device import SHRPiDevice
 
 
@@ -15,19 +20,27 @@ def parse_arguments():
     parser.add_argument("--i2c-bus", type=int, default=I2C_BUS, help="I2C bus number")
     parser.add_argument("--i2c-addr", type=int, default=I2C_ADDR, help="I2C address")
     parser.add_argument(
-        "--blackout-time-limit", type=float, default=DEFAULT_BLACKOUT_TIME_LIMIT,
-        help="The device will initiate shutdown after this many seconds of blackout"
+        "--blackout-time-limit",
+        type=float,
+        default=DEFAULT_BLACKOUT_TIME_LIMIT,
+        help="The device will initiate shutdown after this many seconds of blackout",
     )
     parser.add_argument(
-        "--blackout-voltage-limit", type=float, default=DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
-        help="The device will initiate shutdown if the input voltage drops below this value"
+        "--blackout-voltage-limit",
+        type=float,
+        default=DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
+        help="The device will initiate shutdown if the input voltage drops below this value",
     )
-    parser.add_argument("-n", default=False, action="store_true", help="Dry run (no shutdown)")
+    parser.add_argument(
+        "-n", default=False, action="store_true", help="Dry run (no shutdown)"
+    )
 
     return parser.parse_args()
 
 
-def run_state_machine(logger, dev, blackout_time_limit, blackout_voltage_limit, dry_run=False):
+def run_state_machine(
+    logger, dev, blackout_time_limit, blackout_voltage_limit, dry_run=False
+):
     state = "START"
     blackout_time = 0
 
@@ -63,9 +76,7 @@ def run_state_machine(logger, dev, blackout_time_limit, blackout_voltage_limit, 
                 state = "OK"
             elif time.time() - blackout_time > blackout_time_limit:
                 # didn't get power back in time
-                logger.warn(
-                    "Blacked out for {} s, shutting down".format(blackout_time_limit)
-                )
+                logger.warn(f"Blacked out for {blackout_time_limit} s, shutting down")
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
             if dry_run:

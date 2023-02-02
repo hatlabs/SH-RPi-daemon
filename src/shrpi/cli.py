@@ -1,4 +1,3 @@
-
 from shrpi.shrpi_device import SHRPiDevice
 
 
@@ -8,8 +7,8 @@ def main():
     hw_ver = dev.hardware_version()
     fw_ver = dev.firmware_version()
 
-    print("Hardware version: {}".format(hw_ver))
-    print("Firmware version: {}".format(fw_ver))
+    print(f"Hardware version: {hw_ver}")
+    print(f"Firmware version: {fw_ver}")
 
     en5v_state = dev.en5v_state()
     print("5V state: {}".format("on" if en5v_state else "off"))
@@ -17,29 +16,29 @@ def main():
     power_on_threshold = dev.power_on_threshold()
     power_off_threshold = dev.power_off_threshold()
 
-    print("Power-on threshold voltage: {}".format(power_on_threshold))
-    print("Power-off threshold voltage: {}".format(power_off_threshold))
+    print(f"Power-on threshold voltage: {power_on_threshold}")
+    print(f"Power-off threshold voltage: {power_off_threshold}")
 
     state = dev.state()
 
-    print("Hat state: {}".format(state))
+    print(f"Hat state: {state}")
 
     dcin_voltage = dev.dcin_voltage()
 
-    print("DCIN voltage: {}".format(dcin_voltage))
+    print(f"DCIN voltage: {dcin_voltage}")
 
     supercap_voltage = dev.supercap_voltage()
 
-    print("Supercap voltage: {}".format(supercap_voltage))
+    print(f"Supercap voltage: {supercap_voltage}")
 
     input_current = dev.input_current()
 
-    print("Input current: {}".format(input_current))
+    print(f"Input current: {input_current}")
 
     temperature_K = dev.temperature()
     temperature_C = temperature_K - 273.15
 
-    print("MCU temperature: {}".format(temperature_C))
+    print(f"MCU temperature: {temperature_C}")
 
 
 if __name__ == "__main__":
