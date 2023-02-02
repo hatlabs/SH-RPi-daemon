@@ -3,10 +3,6 @@ import time
 
 from smbus2 import SMBus
 
-VCAP_MAX = 9.35
-DCIN_MAX = 32.1
-I_MAX = 2.5
-TEMP_MAX = 512.0
 
 
 class States(Enum):
