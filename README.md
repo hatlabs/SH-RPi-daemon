@@ -1,5 +1,7 @@
 # Sailor Hat for Raspberry Pi: Daemon
 
+**IMPORTANT**: This branch contains instructions for installing the SH-RPi daemon for SH-RPi v1.0. If you have a newer device (anything purchased in 2023 or later), have a look at the [repository main branch](https://github.com/hatlabs/SH-RPi-daemon) for the latest software and instructions.
+
 ## Introduction
 
 [Sailor Hat for Raspberry Pi](https://hatlabs.github.io/sh-rpi/)
@@ -30,7 +32,7 @@ A fully automated installation script is provided. The script is tested on newly
 To run the automated installation script, copy-paste the following command onto the Raspberry Pi command prompt:
 
     curl -L \
-        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install.sh \
+        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/v1/install.sh \
         | sudo bash
 
 The command will fetch the installation script and execute it automatically.
