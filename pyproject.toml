@@ -27,6 +27,10 @@ classifiers = [  #! Update me
   "Programming Language :: Python :: 3.9",
 ]
 
+packages = [
+  { include = "shrpi", from = "src" },
+]
+
 [tool.poetry.scripts]
 shrpid = "shrpid:__main__:daemon"
 shrpic = "shrpid:__main__:cli"
@@ -34,7 +38,6 @@ shrpic = "shrpid:__main__:cli"
 [tool.poetry.dependencies]
 python = "^3.9"
 smbus2 = "^0.4.2"
-
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.4"
