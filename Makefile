@@ -30,7 +30,7 @@ pre-commit-install:
 #* Formatters
 .PHONY: codestyle
 codestyle:
-	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus **/*.py
+	poetry run pyupgrade --exit-zero-even-if-changed --py39-plus src/**/*.py
 	poetry run isort --settings-path pyproject.toml ./
 	poetry run black --config pyproject.toml ./
 
@@ -40,14 +40,14 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=shrpid tests/
+	PYTHONPATH=$(PYTHONPATH) poetry run pytest -c pyproject.toml --cov-report=html --cov=src tests/
 	poetry run coverage-badge -o assets/images/coverage.svg -f
 
 .PHONY: check-codestyle
 check-codestyle:
 	poetry run isort --diff --check-only --settings-path pyproject.toml ./
 	poetry run black --diff --check --config pyproject.toml ./
-	poetry run darglint --verbosity 2 shrpid tests
+	poetry run darglint --verbosity 2 src tests
 
 .PHONY: mypy
 mypy:
@@ -57,7 +57,7 @@ mypy:
 check-safety:
 	poetry check
 	poetry run safety check --full-report
-	poetry run bandit -ll --recursive shrpid tests
+	poetry run bandit -ll --recursive src tests
 
 .PHONY: lint
 lint: test check-codestyle mypy check-safety
