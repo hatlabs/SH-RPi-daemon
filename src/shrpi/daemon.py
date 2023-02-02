@@ -7,24 +7,29 @@ from subprocess import check_call
 import signal
 import sys
 import time
-from shrpi.const import BLACKOUT_TIME_LIMIT, BLACKOUT_VOLTAGE_LIMIT, I2C_ADDR, I2C_BUS
+from shrpi.const import DEFAULT_BLACKOUT_TIME_LIMIT, DEFAULT_BLACKOUT_VOLTAGE_LIMIT, I2C_ADDR, I2C_BUS
 
 from shrpi.shrpi_device import SHRPiDevice
 
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--i2c-bus", type=int, default=I2C_BUS)
-    parser.add_argument("--i2c-addr", type=int, default=I2C_ADDR)
+    parser.add_argument("--i2c-bus", type=int, default=I2C_BUS, help="I2C bus number")
+    parser.add_argument("--i2c-addr", type=int, default=I2C_ADDR, help="I2C address")
     parser.add_argument(
-        "--allowed-blackout-time", type=float, default=BLACKOUT_TIME_LIMIT
+        "--blackout-time-limit", type=float, default=DEFAULT_BLACKOUT_TIME_LIMIT,
+        help="The device will initiate shutdown after this many seconds of blackout"
     )
-    parser.add_argument("-n", default=False, action="store_true")
+    parser.add_argument(
+        "--blackout-voltage-limit", type=float, default=DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
+        help="The device will initiate shutdown if the input voltage drops below this value"
+    )
+    parser.add_argument("-n", default=False, action="store_true", help="Dry run (no shutdown)")
 
     return parser.parse_args()
 
 
-def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
+def run_state_machine(logger, dev, blackout_time_limit, blackout_voltage_limit, dry_run=False):
     state = "START"
     blackout_time = 0
 
@@ -46,26 +51,26 @@ def run_state_machine(logger, dev, allowed_blackout_time, pretend_only=False):
 
         if state == "START":
             dev.set_watchdog_timeout(10)
-            if dcin_voltage < BLACKOUT_VOLTAGE_LIMIT:
+            if dcin_voltage < blackout_voltage_limit:
                 logger.warn("Detected blackout on startup, ignoring")
             state = "OK"
         elif state == "OK":
-            if dcin_voltage < BLACKOUT_VOLTAGE_LIMIT:
+            if dcin_voltage < blackout_voltage_limit:
                 logger.warn("Detected blackout")
                 blackout_time = time.time()
                 state = "BLACKOUT"
         elif state == "BLACKOUT":
-            if dcin_voltage > BLACKOUT_VOLTAGE_LIMIT:
+            if dcin_voltage > blackout_voltage_limit:
                 logger.info("Power resumed")
                 state = "OK"
-            elif time.time() - blackout_time > allowed_blackout_time:
+            elif time.time() - blackout_time > blackout_time_limit:
                 # didn't get power back in time
                 logger.warn(
-                    "Blacked out for {} s, shutting down".format(allowed_blackout_time)
+                    "Blacked out for {} s, shutting down".format(blackout_time_limit)
                 )
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
-            if pretend_only:
+            if dry_run:
                 logger.warn("Would execute /sbin/poweroff")
             else:
                 # inform the hat about this sad state of affairs
@@ -88,14 +93,14 @@ def main():
 
     dev = SHRPiDevice(i2c_bus, i2c_addr)
 
-    allowed_blackout_time = args.allowed_blackout_time
-
     logger = logging.getLogger("sh_rpi")
     handler = logging.handlers.SysLogHandler(address="/dev/log")
     formatter = logging.Formatter("%(name)s[%(process)d]: %(message)s")
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
+    blackout_time_limit = args.blackout_time_limit
+    blackout_voltage_limit = args.blackout_voltage_limit
 
     def cleanup(signum, frame):
         logger.info("Disabling SH-RPi watchdog")
@@ -105,7 +110,7 @@ def main():
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    run_state_machine(logger, dev, allowed_blackout_time)
+    run_state_machine(logger, dev, blackout_time_limit, blackout_voltage_limit)
 
 
 if __name__ == "__main__":

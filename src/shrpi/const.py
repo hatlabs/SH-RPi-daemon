@@ -6,10 +6,10 @@ I2C_BUS = 1
 I2C_ADDR = 0x6D
 
 # After this many seconds of blackout, the daemon will shut down the Pi
-BLACKOUT_TIME_LIMIT = 3.0
+DEFAULT_BLACKOUT_TIME_LIMIT = 3.0
 
 # This is the input voltage limit that counts as a blackout
-BLACKOUT_VOLTAGE_LIMIT = 9.0
+DEFAULT_BLACKOUT_VOLTAGE_LIMIT = 9.0
 
 # These scaling values apply to SH-RPi v2
 
