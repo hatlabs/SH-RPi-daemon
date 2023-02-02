@@ -12,7 +12,7 @@ from shrpi.const import (
     I2C_ADDR,
     I2C_BUS,
 )
-from shrpi.shrpi_device import SHRPiDevice
+from shrpi.i2c import SHRPiDevice
 
 
 def parse_arguments():

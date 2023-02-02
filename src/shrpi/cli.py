@@ -1,4 +1,4 @@
-from shrpi.shrpi_device import SHRPiDevice
+from shrpi.i2c import SHRPiDevice
 
 
 def main():
