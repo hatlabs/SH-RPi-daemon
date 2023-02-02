@@ -1,18 +1,11 @@
 # Sailor Hat for Raspberry Pi: Daemon
 
-<div class="warning" style='background-color:#BDBA58; color: #000000; border-left: solid #716e14 4px; border-radius: 4px; padding:0.7em;'>
-<span>
-<p style='margin-top:1em; text-align:center'>
-<b>Notice about different versions</b></p>
-<p style='margin-left:1em;'>
-There are two different versions of SH-RPi. Version 1 was released in 2021 and includes an integrated CAN controller for connecting to the NMEA 2000 bus. It uses different daemon software than version 2. Version 1 software is archived to the <a href="https://github.com/hatlabs/SH-RPi-daemon/tree/v1" style='color: #6d131e;'><b>v1</b> branch</a> of this repository.
-</p>
+> **Note**
+>
+> There are two different versions of SH-RPi. Version 1 was released in 2021 and includes an integrated CAN controller for connecting to the NMEA 2000 bus. It uses different daemon software than version 2. Version 1 software is archived to the <a href="https://github.com/hatlabs/SH-RPi-daemon/tree/v1"><b>v1</b> branch</a> of this repository.
+>
+> The description below applies to the current version 2 of SH-RPi. Version 2 is available for purchase at <a href="https://hatlabs.fi/"><b>hatlabs.fi</b></a>.
 
-<p style='margin-left:1em;'>
-The description below applies to the current version 2 of SH-RPi. Version 2 is available for purchase at <a href="https://hatlabs.fi/" style='color: #6d131e;'><b>hatlabs.fi</b></a>.
-</p>
-</span>
-</div>
 
 ## Introduction
 
