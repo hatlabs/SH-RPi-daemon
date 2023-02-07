@@ -8,6 +8,3 @@ def daemon():
 
 def cli():
     shrpi.cli.main()
-
-
-daemon()

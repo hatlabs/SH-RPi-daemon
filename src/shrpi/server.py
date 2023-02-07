@@ -7,6 +7,7 @@ import pathlib
 import arrow
 from aiohttp import web
 
+import shrpi.const
 import shrpi.i2c
 
 
@@ -21,7 +22,7 @@ class RouteHandlers:
         """Get the hardware and firmware version numbers."""
         hw_version = self.shrpi_device.hardware_version()
         fw_version = self.shrpi_device.firmware_version()
-        daemon_version = "2.0.0-a2"
+        daemon_version = shrpi.const.VERSION
 
         response = {
             "hardware_version": hw_version,

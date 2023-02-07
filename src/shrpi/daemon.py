@@ -34,7 +34,7 @@ def parse_arguments():
         help="The device will initiate shutdown if the input voltage drops below this value",
     )
     parser.add_argument(
-        "--socket-path", "-s",
+        "--socket", "-s",
         type=pathlib.Path,
         default=pathlib.Path("./shrpid.sock"),
         help="Path to the UNIX socket to listen on",
@@ -63,7 +63,11 @@ async def async_main():
 
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
-    socket_path = args.socket_path
+    socket_path = args.socket
+
+    if socket_path.exists():
+        logger.error(f"Socket {socket_path} already exists, exiting")
+        sys.exit(1)
 
     def cleanup(signum, frame):
         logger.info("Disabling SH-RPi watchdog")

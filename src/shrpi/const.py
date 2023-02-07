@@ -16,3 +16,7 @@ VCAP_MAX = 9.35
 DCIN_MAX = 32.1
 I_MAX = 2.5
 TEMP_MAX = 512.0  # in Kelvin
+
+# Daemon version
+
+VERSION = "2.0.0-a2"
