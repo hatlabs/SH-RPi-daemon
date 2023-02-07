@@ -1,8 +1,8 @@
 import argparse
+import asyncio
+import pathlib
 import signal
 import sys
-import time
-from subprocess import check_call
 
 from loguru import logger
 
@@ -13,6 +13,8 @@ from shrpi.const import (
     I2C_BUS,
 )
 from shrpi.i2c import SHRPiDevice
+from shrpi.server import run_http_server
+from shrpi.state_machine import run_state_machine
 
 
 def parse_arguments():
@@ -32,67 +34,24 @@ def parse_arguments():
         help="The device will initiate shutdown if the input voltage drops below this value",
     )
     parser.add_argument(
+        "--socket-path", "-s",
+        type=pathlib.Path,
+        default=pathlib.Path("./shrpid.sock"),
+        help="Path to the UNIX socket to listen on",
+    )
+    parser.add_argument(
         "-n", default=False, action="store_true", help="Dry run (no shutdown)"
     )
 
     return parser.parse_args()
 
 
-def run_state_machine(
-    logger, dev, blackout_time_limit, blackout_voltage_limit, dry_run=False
-):
-    state = "START"
-    blackout_time = 0.0
-
-    # Poll hardware and firmware versions. This will set SHRPiDevice in the
-    # correct mode.
-    hw_version = dev.hardware_version()
-    fw_version = dev.firmware_version()
-
-    logger.info(
-        "SH-RPi device detected; HW version %s, FW version %s", hw_version, fw_version
-    )
-
+async def wait_forever():
     while True:
-        # TODO: Provide facilities for reporting the states and voltages
-        # en5v_state = dev.en5v_state()
-        # dev_state = dev.state()
-        dcin_voltage = dev.dcin_voltage()
-        # supercap_voltage = dev.supercap_voltage()
-
-        if state == "START":
-            dev.set_watchdog_timeout(10)
-            if dcin_voltage < blackout_voltage_limit:
-                logger.warn("Detected blackout on startup, ignoring")
-            state = "OK"
-        elif state == "OK":
-            if dcin_voltage < blackout_voltage_limit:
-                logger.warn("Detected blackout")
-                blackout_time = time.time()
-                state = "BLACKOUT"
-        elif state == "BLACKOUT":
-            if dcin_voltage > blackout_voltage_limit:
-                logger.info("Power resumed")
-                state = "OK"
-            elif time.time() - blackout_time > blackout_time_limit:
-                # didn't get power back in time
-                logger.warn(f"Blacked out for {blackout_time_limit} s, shutting down")
-                state = "SHUTDOWN"
-        elif state == "SHUTDOWN":
-            if dry_run:
-                logger.warn("Would execute /sbin/poweroff")
-            else:
-                # inform the hat about this sad state of affairs
-                dev.request_shutdown()
-                check_call(["sudo", "/sbin/poweroff"])
-            state = "DEAD"
-        elif state == "DEAD":
-            # just wait for the inevitable
-            pass
-        time.sleep(0.1)
+        await asyncio.sleep(1)
 
 
-def main():
+async def async_main():
     args = parse_arguments()
 
     i2c_bus = args.i2c_bus
@@ -100,20 +59,34 @@ def main():
 
     # TODO: should test that the device is responding and has correct firmware
 
-    dev = SHRPiDevice(i2c_bus, i2c_addr)
+    shrpi_device = SHRPiDevice(i2c_bus, i2c_addr)
 
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
+    socket_path = args.socket_path
 
     def cleanup(signum, frame):
         logger.info("Disabling SH-RPi watchdog")
-        dev.set_watchdog_timeout(0)
+        shrpi_device.set_watchdog_timeout(0)
+        # delete the socket file
+        if socket_path.exists():
+            socket_path.unlink()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
 
-    run_state_machine(logger, dev, blackout_time_limit, blackout_voltage_limit)
+    # run these with asyncio:
+
+    coro1 = run_state_machine(shrpi_device, blackout_time_limit, blackout_voltage_limit)
+    coro2 = run_http_server(shrpi_device, socket_path)
+    coro3 = wait_forever()
+
+    await asyncio.gather(coro1, coro2, coro3)
+
+
+def main():
+    asyncio.run(async_main())
 
 
 if __name__ == "__main__":

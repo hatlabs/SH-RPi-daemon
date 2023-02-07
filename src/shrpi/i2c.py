@@ -105,7 +105,14 @@ class SHRPiDevice:
         return version_string
 
     def en5v_state(self):
-        return self.i2c_query_byte(0x10)
+        return bool(self.i2c_query_byte(0x10))
+
+    def watchdog_timeout(self):
+        """Get the watchdog timeout in seconds. 0 means the watchdog is disabled."""
+        if self._firmware_version.startswith("2."):
+            return self.i2c_query_word(0x12) / 1000
+        else:
+            return self.i2c_query_byte(0x12) / 10
 
     def set_watchdog_timeout(self, timeout):
         """Set the watchdog timeout in seconds. 0 disables the watchdog."""
@@ -146,7 +153,7 @@ class SHRPiDevice:
     def request_shutdown(self):
         self.i2c_write_byte(0x30, 0x01)
 
-    def request__sleep(self):
+    def request_sleep(self):
         self.i2c_write_byte(0x31, 0x01)
 
     def watchdog_elapsed(self):
