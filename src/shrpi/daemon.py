@@ -1,5 +1,7 @@
 import argparse
 import asyncio
+import grp
+import os
 import pathlib
 import signal
 import sys
@@ -35,9 +37,15 @@ def parse_arguments():
     )
     parser.add_argument(
         "--socket", "-s",
-        type=pathlib.Path,
-        default=pathlib.Path("./shrpid.sock"),
+        type=pathlib.PosixPath,
+        default=None,
         help="Path to the UNIX socket to listen on",
+    )
+    parser.add_argument(
+        "--socket-group", "-g",
+        type=str,
+        default="adm",
+        help="Group to set on the UNIX socket",
     )
     parser.add_argument(
         "-n", default=False, action="store_true", help="Dry run (no shutdown)"
@@ -63,11 +71,39 @@ async def async_main():
 
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
-    socket_path = args.socket
+
+    socket_path: pathlib.PosixPath
+    if args.socket is None:
+        # if we're root user, we should be able to write to /var/run/shrpi.sock
+        if os.getuid() == 0:
+            socket_path = pathlib.PosixPath("/var/run/shrpi.sock")
+        else:
+            socket_path = pathlib.PosixPath.home() / ".shrpi.sock"
+    else:
+        socket_path: pathlib.PosixPath = args.socket
 
     if socket_path.exists():
-        logger.error(f"Socket {socket_path} already exists, exiting")
-        sys.exit(1)
+        # see if it's a socket
+        if not socket_path.is_socket():
+            logger.error(f"{socket_path} exists and is not a socket, exiting")
+            sys.exit(1)
+        elif socket_path.stat().st_uid != 0: # it's a socket, but is it owned by anyone?
+            logger.error(f"{socket_path} exists and is owned by UID {socket_path.stat().st_uid}, exiting")
+            sys.exit(1)
+        else:
+            # it's a socket and not in use, so delete it
+            socket_path.unlink()
+
+    socket_group = 0
+    if args.socket_group is not None:
+        try:
+            socket_group = grp.getgrnam(args.socket_group).gr_gid
+        except KeyError:
+            logger.error(f"Group {args.socket_group} does not exist, exiting")
+            sys.exit(1)
+    else:
+        # if no group is specified, use the current user's primary group
+        socket_group = pathlib.PosixPath.home().stat().st_gid
 
     def cleanup(signum, frame):
         logger.info("Disabling SH-RPi watchdog")
@@ -83,7 +119,7 @@ async def async_main():
     # run these with asyncio:
 
     coro1 = run_state_machine(shrpi_device, blackout_time_limit, blackout_voltage_limit)
-    coro2 = run_http_server(shrpi_device, socket_path)
+    coro2 = run_http_server(shrpi_device, socket_path, socket_group)
     coro3 = wait_forever()
 
     await asyncio.gather(coro1, coro2, coro3)

@@ -2,6 +2,7 @@
 # The server listens on a unix socket, and the client connects to it.
 
 import asyncio
+import os
 import pathlib
 
 import arrow
@@ -179,7 +180,7 @@ class RouteHandlers:
 
 
 async def run_http_server(
-    shrpi_device: shrpi.i2c.SHRPiDevice, socket_path: pathlib.Path
+    shrpi_device: shrpi.i2c.SHRPiDevice, socket_path: pathlib.PosixPath, socket_group: int
 ):
     """Run the HTTP server."""
 
@@ -205,5 +206,9 @@ async def run_http_server(
     await runner.setup()
     site = web.UnixSite(runner, str(socket_path))
     await site.start()
+    # set group ownership of the socket
+    os.chown(str(socket_path), -1, socket_group)
+    # set permissions of the socket
+    os.chmod(str(socket_path), 0o660)
 
     return runner
