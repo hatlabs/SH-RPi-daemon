@@ -93,8 +93,8 @@ async def async_shutdown(socket_path: pathlib.Path):
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
         response = await post_json(session, "http://localhost:8080/shutdown", {})
-        if response.status != 204:
-            console.print(f"Error: {response.status} {response.reason}", style="red")
+        if response != 204:
+            console.print(f"Error: Received HTTP status {response}", style="red")
 
 
 @app.command("shutdown")
@@ -109,8 +109,8 @@ async def async_sleep(socket_path: pathlib.Path, time: dict):
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
         response = await post_json(session, "http://localhost:8080/sleep", time)
-        if response.status != 204:
-            console.print(f"Error: {response.status} {response.reason}", style="red")
+        if response != 204:
+            console.print(f"Error: Received HTTP status {response}", style="red")
 
 
 @app.command("sleep")
@@ -144,7 +144,7 @@ async def async_set_watchdog(socket_path: pathlib.Path, timeout: float):
             session, "http://localhost:8080/config/watchdog_timeout", timeout
         )
         if response != 204:
-            console.print(f"Error: {response.status} {response.reason}", style="red")
+            console.print(f"Error: Received HTTP status {response}", style="red")
 
 
 @set_app.command("watchdog")
@@ -163,7 +163,7 @@ async def async_set_power_on_threshold(socket_path: pathlib.Path, threshold: flo
             session, "http://localhost:8080/config/power_on_threshold", threshold
         )
         if response != 204:
-            console.print(f"Error: {response.status} {response.reason}", style="red")
+            console.print(f"Error: Received HTTP status {response}", style="red")
 
 
 @set_app.command("power-on-threshold")
@@ -181,8 +181,8 @@ async def async_set_power_off_threshold(socket_path: pathlib.Path, threshold: fl
         response = await put_json(
             session, "http://localhost:8080/config/power_off_threshold", threshold
         )
-        if response.status != 204:
-            console.print(f"Error: {response.status} {response.reason}", style="red")
+        if response != 204:
+            console.print(f"Error: Received HTTP status {response}", style="red")
 
 
 @set_app.command("power-off-threshold")
