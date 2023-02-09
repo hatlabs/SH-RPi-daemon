@@ -33,6 +33,7 @@ class SHRPiDevice:
         self._hardware_version = "Unknown"
         self._firmware_version = "Unknown"
         self.read_analog = self.read_analog_byte  # default to v1 protocol
+        self.write_analog = self.write_analog_byte  # default to v1 protocol
 
     def i2c_query_byte(self, reg):
         with SMBus(self.bus) as bus:
@@ -73,12 +74,19 @@ class SHRPiDevice:
         self._firmware_version = version
         if version.startswith("2."):
             self.read_analog = self.read_analog_word
+            self.write_analog = self.write_analog_word
 
     def read_analog_byte(self, reg, scale):
         return scale * self.i2c_query_byte(reg) / 256
 
+    def write_analog_byte(self, reg, val, scale):
+        self.i2c_write_byte(reg, int(256 * val / scale))
+
     def read_analog_word(self, reg, scale):
         return scale * self.i2c_query_word(reg) / 65536
+
+    def write_analog_word(self, reg, val, scale):
+        self.i2c_write_word(reg, int(65536 * val / scale))
 
     def hardware_version(self):
         legacy_version = self.i2c_query_byte(0x01)
@@ -124,8 +132,14 @@ class SHRPiDevice:
     def power_on_threshold(self):
         return self.read_analog(0x13, VCAP_MAX)
 
+    def set_power_on_threshold(self, threshold):
+        self.write_analog(0x13, threshold, VCAP_MAX)
+
     def power_off_threshold(self):
         return self.read_analog(0x14, VCAP_MAX)
+
+    def set_power_off_threshold(self, threshold):
+        self.write_analog(0x14, threshold, VCAP_MAX)
 
     def state(self):
         return States(self.i2c_query_byte(0x15)).name

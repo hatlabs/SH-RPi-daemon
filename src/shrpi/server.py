@@ -2,6 +2,7 @@
 # The server listens on a unix socket, and the client connects to it.
 
 import asyncio
+import numbers
 import os
 import pathlib
 
@@ -85,7 +86,7 @@ class RouteHandlers:
 
         # Use rtcwake to set the RTC alarm to wake up the system
         asyncio.create_task(
-            asyncio.create_subprocess_exec("rtcwake", "-m", "mem", "-t", str(timestamp))
+            asyncio.create_subprocess_exec("rtcwake", "-m", "no", "-t", str(timestamp))
         )
 
         self.shrpi_device.request_sleep()
@@ -129,17 +130,17 @@ class RouteHandlers:
         key = request.match_info["key"]
 
         data = await request.json()
-        if key not in data:
-            return web.Response(status=400, text=f"Missing {key} key in request body")
 
-        value = data[key]
+        # check that data is a number
+        if not isinstance(data, numbers.Number):
+            return web.Response(status=400, text="Value must be a number")
 
         if key == "watchdog_timeout":
-            self.shrpi_device.set_watchdog_timeout(value)
+            self.shrpi_device.set_watchdog_timeout(data)
         elif key == "power_on_threshold":
-            self.shrpi_device.set_power_on_threshold(value)
+            self.shrpi_device.set_power_on_threshold(data)
         elif key == "power_off_threshold":
-            self.shrpi_device.set_power_off_threshold(value)
+            self.shrpi_device.set_power_off_threshold(data)
         else:
             return web.Response(status=404)
 
@@ -180,7 +181,9 @@ class RouteHandlers:
 
 
 async def run_http_server(
-    shrpi_device: shrpi.i2c.SHRPiDevice, socket_path: pathlib.PosixPath, socket_group: int
+    shrpi_device: shrpi.i2c.SHRPiDevice,
+    socket_path: pathlib.PosixPath,
+    socket_group: int,
 ):
     """Run the HTTP server."""
 

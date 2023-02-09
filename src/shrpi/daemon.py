@@ -36,13 +36,15 @@ def parse_arguments():
         help="The device will initiate shutdown if the input voltage drops below this value",
     )
     parser.add_argument(
-        "--socket", "-s",
+        "--socket",
+        "-s",
         type=pathlib.PosixPath,
         default=None,
         help="Path to the UNIX socket to listen on",
     )
     parser.add_argument(
-        "--socket-group", "-g",
+        "--socket-group",
+        "-g",
         type=str,
         default="adm",
         help="Group to set on the UNIX socket",
@@ -87,8 +89,12 @@ async def async_main():
         if not socket_path.is_socket():
             logger.error(f"{socket_path} exists and is not a socket, exiting")
             sys.exit(1)
-        elif socket_path.stat().st_uid != 0: # it's a socket, but is it owned by anyone?
-            logger.error(f"{socket_path} exists and is owned by UID {socket_path.stat().st_uid}, exiting")
+        elif (
+            socket_path.stat().st_uid != 0
+        ):  # it's a socket, but is it owned by anyone?
+            logger.error(
+                f"{socket_path} exists and is owned by UID {socket_path.stat().st_uid}, exiting"
+            )
             sys.exit(1)
         else:
             # it's a socket and not in use, so delete it

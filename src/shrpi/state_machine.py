@@ -48,7 +48,9 @@ async def run_state_machine(
                 state = "OK"
             elif time.time() - blackout_time > blackout_time_limit:
                 # didn't get power back in time
-                logger.warning(f"Blacked out for {blackout_time_limit} s, shutting down")
+                logger.warning(
+                    f"Blacked out for {blackout_time_limit} s, shutting down"
+                )
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
             if dry_run:
