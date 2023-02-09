@@ -35,11 +35,11 @@ async def run_state_machine(
         if state == "START":
             shrpi_device.set_watchdog_timeout(10)
             if dcin_voltage < blackout_voltage_limit:
-                logger.warn("Detected blackout on startup, ignoring")
+                logger.warning("Detected blackout on startup, ignoring")
             state = "OK"
         elif state == "OK":
             if dcin_voltage < blackout_voltage_limit:
-                logger.warn("Detected blackout")
+                logger.warning("Detected blackout")
                 blackout_time = time.time()
                 state = "BLACKOUT"
         elif state == "BLACKOUT":
@@ -48,11 +48,11 @@ async def run_state_machine(
                 state = "OK"
             elif time.time() - blackout_time > blackout_time_limit:
                 # didn't get power back in time
-                logger.warn(f"Blacked out for {blackout_time_limit} s, shutting down")
+                logger.warning(f"Blacked out for {blackout_time_limit} s, shutting down")
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
             if dry_run:
-                logger.warn("Would execute /sbin/poweroff")
+                logger.warning("Would execute /sbin/poweroff")
             else:
                 # inform the hat about this sad state of affairs
                 shrpi_device.request_shutdown()
