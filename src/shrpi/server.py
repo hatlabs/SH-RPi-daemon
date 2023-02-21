@@ -146,7 +146,7 @@ class RouteHandlers:
         elif key == "power_off_threshold":
             self.shrpi_device.set_power_off_threshold(data)
         elif key == "led_brightness":
-            self.shrpi_device.set_led_brightness(data)
+            self.shrpi_device.set_led_brightness(int(data))
         else:
             return web.Response(status=404)
 

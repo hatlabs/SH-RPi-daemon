@@ -72,6 +72,7 @@ async def async_print_all(socket_path: pathlib.Path):
         table.add_row(
             "Power-off threshold", f'{config["power_off_threshold"]:.1f}', "V"
         )
+        table.add_row("LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%")
         table.add_section()
 
         table.add_row("Voltage in", f'{values["V_in"]:.1f}', "V")
@@ -191,6 +192,24 @@ def set_power_off_threshold(threshold: float):
     Set power-off threshold in volts.
     """
     asyncio.run(async_set_power_off_threshold(state["socket"], threshold))
+
+async def async_set_led_brightness(socket_path: pathlib.Path, brightness: float):
+    """Set LED brightness in percent."""
+    brightness_byte = int(brightness * 255 / 100)
+    connector = aiohttp.UnixConnector(path=str(socket_path))
+    async with aiohttp.ClientSession(connector=connector) as session:
+        response = await put_json(
+            session, "http://localhost:8080/config/led_brightness", brightness_byte
+        )
+        if response != 204:
+            console.print(f"Error: Received HTTP status {response}", style="red")
+
+@set_app.command("led")
+def set_led_brightness(brightness: float):
+    """
+    Set LED brightness in percent.
+    """
+    asyncio.run(async_set_led_brightness(state["socket"], brightness))
 
 
 @app.callback()
