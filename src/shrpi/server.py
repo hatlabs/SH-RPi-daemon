@@ -101,11 +101,13 @@ class RouteHandlers:
         watchdog_timeout = self.shrpi_device.watchdog_timeout()
         power_on_threshold = self.shrpi_device.power_on_threshold()
         power_off_threshold = self.shrpi_device.power_off_threshold()
+        led_brightness = self.shrpi_device.led_brightness()
 
         config = {
             "watchdog_timeout": watchdog_timeout,
             "power_on_threshold": power_on_threshold,
             "power_off_threshold": power_off_threshold,
+            "led_brightness": led_brightness,
         }
 
         return web.json_response(config)
@@ -120,6 +122,8 @@ class RouteHandlers:
             value = self.shrpi_device.power_on_threshold()
         elif key == "power_off_threshold":
             value = self.shrpi_device.power_off_threshold()
+        elif key == "led_brightness":
+            value = self.shrpi_device.led_brightness()
         else:
             return web.Response(status=404)
 
@@ -141,6 +145,8 @@ class RouteHandlers:
             self.shrpi_device.set_power_on_threshold(data)
         elif key == "power_off_threshold":
             self.shrpi_device.set_power_off_threshold(data)
+        elif key == "led_brightness":
+            self.shrpi_device.set_led_brightness(data)
         else:
             return web.Response(status=404)
 

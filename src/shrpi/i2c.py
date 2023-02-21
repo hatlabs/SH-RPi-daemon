@@ -144,6 +144,12 @@ class SHRPiDevice:
     def state(self):
         return States(self.i2c_query_byte(0x15)).name
 
+    def led_brightness(self):
+        return self.i2c_query_byte(0x17)
+
+    def set_led_brightness(self, brightness):
+        self.i2c_write_byte(0x17, brightness)
+
     def dcin_voltage(self):
         return self.read_analog(0x20, DCIN_MAX)
 
