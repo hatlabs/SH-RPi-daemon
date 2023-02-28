@@ -27,7 +27,7 @@ if [ -z "$REPOURL" ] ; then
 fi
 
 if [ -z "$BRANCH" ] ; then
-    BRANCH="latest"
+    BRANCH="main"
 fi
 
 # create a temporary directory for the installation
