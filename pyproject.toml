@@ -94,7 +94,7 @@ include_trailing_comma = true
 profile = "black"
 multi_line_output = 3
 indent = 4
-color_output = true
+color_output = false
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
