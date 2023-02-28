@@ -1,12 +1,8 @@
 from enum import Enum
-import time
 
 from smbus2 import SMBus
 
-VCAP_MAX = 9.35
-DCIN_MAX = 32.1
-I_MAX = 2.5
-TEMP_MAX = 512.0
+from shrpi.const import DCIN_MAX, I_MAX, TEMP_MAX, VCAP_MAX
 
 
 class States(Enum):
@@ -34,9 +30,10 @@ class SHRPiDevice:
     def __init__(self, bus, addr):
         self.bus = bus
         self.addr = addr
-        self._hardware_version = None
-        self._firmware_version = None
+        self._hardware_version = "Unknown"
+        self._firmware_version = "Unknown"
         self.read_analog = self.read_analog_byte  # default to v1 protocol
+        self.write_analog = self.write_analog_byte  # default to v1 protocol
 
     def i2c_query_byte(self, reg):
         with SMBus(self.bus) as bus:
@@ -77,12 +74,19 @@ class SHRPiDevice:
         self._firmware_version = version
         if version.startswith("2."):
             self.read_analog = self.read_analog_word
+            self.write_analog = self.write_analog_word
 
     def read_analog_byte(self, reg, scale):
         return scale * self.i2c_query_byte(reg) / 256
 
+    def write_analog_byte(self, reg, val, scale):
+        self.i2c_write_byte(reg, int(256 * val / scale))
+
     def read_analog_word(self, reg, scale):
         return scale * self.i2c_query_word(reg) / 65536
+
+    def write_analog_word(self, reg, val, scale):
+        self.i2c_write_word(reg, int(65536 * val / scale))
 
     def hardware_version(self):
         legacy_version = self.i2c_query_byte(0x01)
@@ -109,7 +113,14 @@ class SHRPiDevice:
         return version_string
 
     def en5v_state(self):
-        return self.i2c_query_byte(0x10)
+        return bool(self.i2c_query_byte(0x10))
+
+    def watchdog_timeout(self):
+        """Get the watchdog timeout in seconds. 0 means the watchdog is disabled."""
+        if self._firmware_version.startswith("2."):
+            return self.i2c_query_word(0x12) / 1000
+        else:
+            return self.i2c_query_byte(0x12) / 10
 
     def set_watchdog_timeout(self, timeout):
         """Set the watchdog timeout in seconds. 0 disables the watchdog."""
@@ -121,11 +132,23 @@ class SHRPiDevice:
     def power_on_threshold(self):
         return self.read_analog(0x13, VCAP_MAX)
 
+    def set_power_on_threshold(self, threshold):
+        self.write_analog(0x13, threshold, VCAP_MAX)
+
     def power_off_threshold(self):
         return self.read_analog(0x14, VCAP_MAX)
 
+    def set_power_off_threshold(self, threshold):
+        self.write_analog(0x14, threshold, VCAP_MAX)
+
     def state(self):
         return States(self.i2c_query_byte(0x15)).name
+
+    def led_brightness(self):
+        return self.i2c_query_byte(0x17)
+
+    def set_led_brightness(self, brightness):
+        self.i2c_write_byte(0x17, brightness)
 
     def dcin_voltage(self):
         return self.read_analog(0x20, DCIN_MAX)
@@ -150,7 +173,7 @@ class SHRPiDevice:
     def request_shutdown(self):
         self.i2c_write_byte(0x30, 0x01)
 
-    def request__sleep(self):
+    def request_sleep(self):
         self.i2c_write_byte(0x31, 0x01)
 
     def watchdog_elapsed(self):

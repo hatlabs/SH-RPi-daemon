@@ -1,0 +1,9 @@
+name: shrpid
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.9.*  # or don't specify the version and use the latest stable Python
+  - mamba
+  - pip  # pip must be mentioned explicitly, or conda-lock will fail
+  - poetry=1.*  # or 1.1.*, or no version at all -- as you want

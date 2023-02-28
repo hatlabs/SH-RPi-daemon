@@ -1,0 +1,13 @@
+# This file contains values from Cookiecutter
+
+default_context:
+  project_name: "shrpid"
+  project_description: "`sh-rpi-daemon` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation."
+  organization: "hatlabs"
+  license: "BSD-3"
+  minimal_python_version: 3.9
+  github_name: "hatlabs"
+  email: "matti.airas@hatlabs.fi"
+  version: "2.0.0-a2"
+  line_length: "88"
+  create_example_template: "none"

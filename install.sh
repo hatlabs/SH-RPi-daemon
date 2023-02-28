@@ -1,38 +1,18 @@
 #/usr/bin/env bash
 
-# This installation script is intended for installing SH-RPi-daemon on
+# This installation script is intended for installing shrpid on
 # a new Raspberry Pi computer with a one-line copy-paste command.
 #
-# The script can be run locally but it does _not_ install the daemon
-# from the local source directory but fetches a new copy from GitHub.
+# The script needs root privileges to work properly.
 
 set -euo pipefail
 shopt -s inherit_errexit
 
-# Allow customization of the repository URL and branch
-
-REPOURL="${1-}"
-BRANCH="${2-}"
-
-if [ -z "$REPOURL" ] ; then
-    REPOURL="https://github.com/hatlabs/SH-RPi-daemon"
+# Bail out if not running as root
+if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root" 1>&2
+    exit 1
 fi
-
-if [ -z "$BRANCH" ] ; then
-    BRANCH="main"
-fi
-
-# create a temporary directory for the installation
-
-tmp_dir=$(mktemp -d -t SH-RPi-daemon-XXXXXXXX)
-cd $tmp_dir
-
-curl -L \
-    ${REPOURL}/archive/refs/heads/${BRANCH}.zip \
-    -o SH-RPi-daemon-${BRANCH}.zip
-
-unzip SH-RPi-daemon-${BRANCH}.zip
-cd SH-RPi-daemon-${BRANCH}
 
 # install the device tree overlay and other configuration files
 
@@ -42,14 +22,14 @@ popd
 
 # install the daemon build dependencies
 
-apt install -y python3-setuptools
+apt install -y python3-pip
 
 # install the daemon itself
 
-python3 setup.py install
+pip3 install .
 
 # copy the service definition file in place
 
-install -o root sh-rpi-daemon.service /lib/systemd/system
+install -o root shrpid.service /lib/systemd/system
 systemctl daemon-reload
-systemctl enable sh-rpi-daemon
+systemctl enable shrpid
