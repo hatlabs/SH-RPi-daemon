@@ -41,7 +41,9 @@ The main use case for the service software is to have the Raspberry Pi shut down
 
 ## Installation
 
-curl -L \
+Copy and paste the following lines to your terminal to install the latest version of the daemon and to update the configuration files:
+
+    curl -L \
         https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install.sh \
         | sudo bash
 
