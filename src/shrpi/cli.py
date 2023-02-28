@@ -193,6 +193,7 @@ def set_power_off_threshold(threshold: float):
     """
     asyncio.run(async_set_power_off_threshold(state["socket"], threshold))
 
+
 async def async_set_led_brightness(socket_path: pathlib.Path, brightness: float):
     """Set LED brightness in percent."""
     brightness_byte = int(brightness * 255 / 100)
@@ -203,6 +204,7 @@ async def async_set_led_brightness(socket_path: pathlib.Path, brightness: float)
         )
         if response != 204:
             console.print(f"Error: Received HTTP status {response}", style="red")
+
 
 @set_app.command("led")
 def set_led_brightness(brightness: float):
