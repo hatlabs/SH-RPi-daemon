@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#/bin/bash
 
 # This installation script is intended for installing shrpid on
 # a new Raspberry Pi computer with a one-line copy-paste command.
@@ -36,10 +36,10 @@ tmp_dir=$(mktemp -d -t SH-RPi-daemon-XXXXXXXX)
 cd $tmp_dir
 
 curl -L \
-    ${REPOURL}/archive/refs/heads/${BRANCH}.zip \
-    -o SH-RPi-daemon-${BRANCH}.zip
+    ${REPOURL}/archive/refs/heads/${BRANCH}.tar.gz \
+    -o SH-RPi-daemon-${BRANCH}.tar.gz
 
-unzip SH-RPi-daemon-${BRANCH}.zip
+tar zxvf SH-RPi-daemon-${BRANCH}.tar.gz
 cd SH-RPi-daemon-${BRANCH}
 
 ./install.sh

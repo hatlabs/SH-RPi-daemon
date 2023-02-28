@@ -41,7 +41,9 @@ The main use case for the service software is to have the Raspberry Pi shut down
 
 ## Installation
 
-**Installation script for SH-RPi v2 is not yet available.**
+curl -L \
+        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install.sh \
+        | sudo bash
 
 ## SH-RPi documentation
 

@@ -1,4 +1,4 @@
-#/usr/bin/env bash
+#/bin/bash
 
 # This installation script is intended for installing shrpid on
 # a new Raspberry Pi computer with a one-line copy-paste command.
