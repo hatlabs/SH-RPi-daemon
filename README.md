@@ -1,5 +1,17 @@
 # Sailor Hat for Raspberry Pi: Daemon
 
+[![Build status](https://github.com/hatlabs/shrpid/workflows/build/badge.svg?branch=master&event=push)](https://github.com/hatlabs/shrpid/actions?query=workflow%3Abuild)
+[![Python Version](https://img.shields.io/pypi/pyversions/shrpid.svg)](https://pypi.org/project/shrpid/)
+[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/hatlabs/shrpid/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot)
+
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
+[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/hatlabs/shrpid/blob/master/.pre-commit-config.yaml)
+[![Semantic Versions](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--versions-e10079.svg)](https://github.com/hatlabs/shrpid/releases)
+[![License](https://img.shields.io/github/license/hatlabs/shrpid)](https://github.com/hatlabs/shrpid/blob/master/LICENSE)
+![Coverage Report](assets/images/coverage.svg)
+
+
 > **Note**
 >
 > There are two different versions of SH-RPi. Version 1 was released in 2021 and includes an integrated CAN controller for connecting to the NMEA 2000 bus. It uses different daemon software than version 2. Version 1 software is archived to the <a href="https://github.com/hatlabs/SH-RPi-daemon/tree/v1"><b>v1</b> branch</a> of this repository.
@@ -12,19 +24,20 @@
 [SH-RPi](https://shop.hatlabs.fi/products/sh-rpi), formally known as Sailor Hat for Raspberry Pi,
 is a Raspberry Pi smart power management board. The main features are:
 
-- Power management with a 60F supercapacitor that provides so-called last gasp energy for shutting down the device in a controlled fashion after the system power is cut.
-- Peak power management: The same supercapacitor circuitry is able to provide peak current for power-hungry devices such as the Raspberry Pi 4B, allowing those devices to be powered using current-limited subcircuits such as the NMEA2000 bus power wires.
+- Power management with a 60 Farad supercapacitor that provides so-called last gasp energy for shutting down the device in a controlled fashion after the system power is cut.
+- Peak power management: The same supercapacitor circuitry is able to provide peak current for power-hungry devices such as the Raspberry Pi 4B with SSD or NVMe drives, allowing those devices to be powered using current-limited subcircuits such as the NMEA2000 bus power wires.
 - Protection circuitry: The board is protected against noisy 12V/24V voltages commonly present on vehicles or marine vessels.
 - A battery-powered real-time clock circuit, allowing for the device to keep time even in the absence of GPS or networking.
   
-`sh-rpi-daemon` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation. Supported features include:
+`shrpid` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation. Supported features include:
 
 - Blackout reporting if input voltage falls below a defined threshold
 - Triggering of device shutdown if power isn't restored
 - Supercap voltage reporting
 - Watchdog functionality: if the SH-RPi receives no communication for 10 seconds, the SH-RPi will hard reset the device.
+- RTC sleep mode: the onboard real-time clock can be set to boot the Raspberry Pi at a specific time. This is useful for battery powered devices that should perform scheduled tasks such as boat battery and bilge level monitoring.
 
-The main use case for the script is to have the board powered via a supercapacitor. If the power for the board is disconnected, the supercap is able to supply sufficient power that the device is able to shut itself down in a controlled fashion.
+The main use case for the service software is to have the Raspberry Pi shut down once the power is cut. This prevents potential file system corruption without having to shut down the device manually.
 
 ## Installation
 
@@ -38,86 +51,9 @@ For a more detailed SH-RPi documentation, please visit the [documentation websit
 
 Sh-RPi devices are available for purchase at [shop.hatlabs.fi](https://shop.hatlabs.fi/).
 
- # shrpid
+----
 
-<div align="center">
-
-[![Build status](https://github.com/hatlabs/shrpid/workflows/build/badge.svg?branch=master&event=push)](https://github.com/hatlabs/shrpid/actions?query=workflow%3Abuild)
-[![Python Version](https://img.shields.io/pypi/pyversions/shrpid.svg)](https://pypi.org/project/shrpid/)
-[![Dependencies Status](https://img.shields.io/badge/dependencies-up%20to%20date-brightgreen.svg)](https://github.com/hatlabs/shrpid/pulls?utf8=%E2%9C%93&q=is%3Apr%20author%3Aapp%2Fdependabot)
-
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Security: bandit](https://img.shields.io/badge/security-bandit-green.svg)](https://github.com/PyCQA/bandit)
-[![Pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/hatlabs/shrpid/blob/master/.pre-commit-config.yaml)
-[![Semantic Versions](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--versions-e10079.svg)](https://github.com/hatlabs/shrpid/releases)
-[![License](https://img.shields.io/github/license/hatlabs/shrpid)](https://github.com/hatlabs/shrpid/blob/master/LICENSE)
-![Coverage Report](assets/images/coverage.svg)
-
-`sh-rpi-daemon` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation.
-
-</div>
-
-## Very first steps
-
-### Initialize your code
-
-1. Initialize `git` inside your repo:
-
-```bash
-cd shrpid && git init
-```
-
-2. If you don't have `Poetry` installed run:
-
-```bash
-make poetry-download
-```
-
-3. Initialize poetry and install `pre-commit` hooks:
-
-```bash
-make install
-make pre-commit-install
-```
-
-4. Run the codestyle:
-
-```bash
-make codestyle
-```
-
-5. Upload initial code to GitHub:
-
-```bash
-git add .
-git commit -m ":tada: Initial commit"
-git branch -M main
-git remote add origin https://github.com/hatlabs/shrpid.git
-git push -u origin main
-```
-
-### Set up bots
-
-- Set up [Dependabot](https://docs.github.com/en/github/administering-a-repository/enabling-and-disabling-version-updates#enabling-github-dependabot-version-updates) to ensure you have the latest dependencies.
-- Set up [Stale bot](https://github.com/apps/stale) for automatic issue closing.
-
-### Poetry
-
-Want to know more about Poetry? Check [its documentation](https://python-poetry.org/docs/).
-
-<details>
-<summary>Details about Poetry</summary>
-<p>
-
-Poetry's [commands](https://python-poetry.org/docs/cli/#commands) are very intuitive and easy to learn, like:
-
-- `poetry add numpy@latest`
-- `poetry run pytest`
-- `poetry publish --build`
-
-etc
-</p>
-</details>
+## 🛠️ Development Instructions
 
 ### Building and releasing your package
 
@@ -127,30 +63,6 @@ Building a new version of the application contains steps:
 - Make a commit to `GitHub`.
 - Create a `GitHub release`.
 - And... publish 🙂 `poetry publish --build`
-
-## 🎯 What's next
-
-Well, that's up to you 💪🏻. I can only recommend the packages and articles that helped me.
-
-- [`Typer`](https://github.com/tiangolo/typer) is great for creating CLI applications.
-- [`Rich`](https://github.com/willmcgugan/rich) makes it easy to add beautiful formatting in the terminal.
-- [`Pydantic`](https://github.com/samuelcolvin/pydantic/) – data validation and settings management using Python type hinting.
-- [`Loguru`](https://github.com/Delgan/loguru) makes logging (stupidly) simple.
-- [`tqdm`](https://github.com/tqdm/tqdm) – fast, extensible progress bar for Python and CLI.
-- [`IceCream`](https://github.com/gruns/icecream) is a little library for sweet and creamy debugging.
-- [`orjson`](https://github.com/ijl/orjson) – ultra fast JSON parsing library.
-- [`Returns`](https://github.com/dry-python/returns) makes you function's output meaningful, typed, and safe!
-- [`Hydra`](https://github.com/facebookresearch/hydra) is a framework for elegantly configuring complex applications.
-- [`FastAPI`](https://github.com/tiangolo/fastapi) is a type-driven asynchronous web framework.
-
-Articles:
-
-- [Open Source Guides](https://opensource.guide/).
-- [A handy guide to financial support for open source](https://github.com/nayafia/lemonade-stand)
-- [GitHub Actions Documentation](https://help.github.com/en/actions).
-- Maybe you would like to add [gitmoji](https://gitmoji.carloscuesta.me/) to commit names. This is really funny. 😄
-
-## 🚀 Features
 
 ### Development features
 
@@ -434,26 +346,3 @@ We use [`Release Drafter`](https://github.com/marketplace/actions/release-drafte
 You can update it in [`release-drafter.yml`](https://github.com/hatlabs/shrpid/blob/master/.github/release-drafter.yml).
 
 GitHub creates the `bug`, `enhancement`, and `documentation` labels for you. Dependabot creates the `dependencies` label. Create the remaining labels on the Issues tab of your GitHub repository, when you need them.
-
-## 🛡 License
-
-[![License](https://img.shields.io/github/license/hatlabs/shrpid)](https://github.com/hatlabs/shrpid/blob/master/LICENSE)
-
-This project is licensed under the terms of the `BSD-3` license. See [LICENSE](https://github.com/hatlabs/shrpid/blob/master/LICENSE) for more details.
-
-## 📃 Citation
-
-```bibtex
-@misc{shrpid,
-  author = {hatlabs},
-  title = {`sh-rpi-daemon` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation.},
-  year = {2023},
-  publisher = {GitHub},
-  journal = {GitHub repository},
-  howpublished = {\url{https://github.com/hatlabs/shrpid}}
-}
-```
-
-## Credits [![🚀 Your next Python package needs a bleeding-edge project structure.](https://img.shields.io/badge/python--package--template-%F0%9F%9A%80-brightgreen)](https://github.com/TezRomacH/python-package-template)
-
-This project was generated with [`python-package-template`](https://github.com/TezRomacH/python-package-template)
