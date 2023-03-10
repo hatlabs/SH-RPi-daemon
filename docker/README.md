@@ -19,7 +19,7 @@ Default name is `IMAGE := shrpid`.
 Default version is `VERSION := latest`.
 
 ```bash
-make docker-build IMAGE=some_name VERSION=2.0.0-a2
+make docker-build IMAGE=some_name VERSION=2.0.0
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ docker run -it --rm \
 To uninstall docker image run `make docker-remove` with `VERSION`:
 
 ```bash
-make docker-remove VERSION=2.0.0-a2
+make docker-remove VERSION=2.0.0
 ```
 
 you may also choose the image name

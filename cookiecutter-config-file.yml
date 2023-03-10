@@ -8,6 +8,6 @@ default_context:
   minimal_python_version: 3.9
   github_name: "hatlabs"
   email: "matti.airas@hatlabs.fi"
-  version: "2.0.0-a2"
+  version: "2.0.0"
   line_length: "88"
   create_example_template: "none"
