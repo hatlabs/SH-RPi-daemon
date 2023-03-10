@@ -34,8 +34,6 @@ async def run_state_machine(
 
         if state == "START":
             shrpi_device.set_watchdog_timeout(10)
-            if dcin_voltage < blackout_voltage_limit:
-                logger.warning("Detected blackout on startup, ignoring")
             state = "OK"
         elif state == "OK":
             if dcin_voltage < blackout_voltage_limit:

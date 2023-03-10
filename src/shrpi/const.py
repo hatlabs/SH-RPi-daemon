@@ -19,4 +19,4 @@ TEMP_MAX = 512.0  # in Kelvin
 
 # Daemon version
 
-VERSION = "2.0.0-a2"
+VERSION = "2.0.0"
