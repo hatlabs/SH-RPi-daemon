@@ -155,6 +155,47 @@ rtc_uninstall() {
   systemctl enable fake-hwclock
 }
 
+do_dialog_rtc() {
+  do_dialog --backtitle "Hat Labs Ltd" \
+    --title "RTC" \
+    --checklist "Would you like to enable the on-board Real-time Clock? \n\
+This will allow the Pi to keep time even when it is not connected to the internet. \n\
+\n\
+Normally, you would want to always enable this. \n\
+Only disable the RTC if you are using a baseboard with built-in RTC. \n\
+In this case, you will need to disable the RTC on SH-RPi. \n\
+See the documentation for more information." 20 61 5 \
+    "Enable" "Enable the on-board Real-time Clock" ON \
+    "Disable" "Disable the on-board Real-time Clock" off \
+    "Skip" "Do not change the RTC setting" off
+}
+
+do_dialog_can() {
+  do_dialog --backtitle "Hat Labs Ltd" \
+    --title "CAN" \
+    --checklist "Would you like to enable the CAN interface? \n\
+Select this option if you got the Waveshare 2-Channel Isolated CAN HAT. \n\
+This will allow the Pi to communicate with a CAN network such as \n\
+NMEA 2000 or J1939. \n\
+NOTE: Enabling the interface without the hardware will significantly \n\
+degrade the Pi performance." 20 61 5 \
+    "Enable" "Enable the CAN interface" ON \
+    "Disable" "Disable the CAN interface" off \
+    "Skip" "Do not change the CAN setting" off
+}
+
+do_dialog_rs485() {
+  do_dialog --backtitle "Hat Labs Ltd" \
+    --title "RS485" \
+    --checklist "Would you like to enable the RS485 interface? \n\
+Select this option if you got the Waveshare 2-Channel Isolated RS485 HAT. \n\
+This will allow the Pi to communicate with compatible devices such as \n\
+NMEA 0183 or Modbus RTU." 20 61 5 \
+    "Enable" "Enable the RS485 interface" ON \
+    "Disable" "Disable the RS485 interface" off \
+    "Skip" "Do not change the RS485 setting" off
+}
+
 do_dialog() {
   : "${DIALOG=dialog}"
 
@@ -172,21 +213,7 @@ do_dialog() {
   tempfile=$( (tempfile) 2>/dev/null) || tempfile=/tmp/test$$
   trap "rm -f $tempfile" 0 $SIG_NONE $SIG_HUP $SIG_INT $SIG_QUIT $SIG_TERM
 
-  $DIALOG --backtitle "Hat Labs Ltd" \
-    --title "CHECKLIST BOX" "$@" \
-    --checklist "Select the devices you want to enable. \n\
-Only select the devices you have connected to your Pi. \n\
-Enabling a device that is not connected may cause \n\
-significant performance degradation. \n\
-\n\
-Use the UP/DOWN arrow keys to choose an option. \n\
-Press SPACE to toggle an option on/off. \n\
-Press ENTER to accept the selected options. \n\
-Press ESC to abort the installation.\n\
-  Select the overlays to enable:" 20 61 5 \
-    "RTC" "Real-time clock. Leave enabled if unsure." on \
-    "CAN" "NMEA 2000 or generic CAN bus support." off \
-    "RS485" "NMEA 0183 or generic RS485 interface support." off 2>$tempfile
+  $DIALOG "$@" 2>$tempfile
 
   retval=$?
 
@@ -223,30 +250,34 @@ if ! command -v dialog &>/dev/null; then
   apt-get -y install dialog
 fi
 
-do_dialog
+# Ask about RTC
 
-# Check if dialog_result includes "RTC"
+do_dialog_rtc
 
-if [[ $dialog_result == *"RTC"* ]]; then
+if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_RTC=1
-else
-  INSTALL_RTC=0
+elif [[ $dialog_result == *"Disable"* ]]; then
+  UNINSTALL_RTC=1
 fi
 
-# Check if dialog_result includes "CAN"
+# Ask about CAN
 
-if [[ $dialog_result == *"CAN"* ]]; then
+do_dialog_can
+
+if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_MCP2515=1
-else
-  INSTALL_MCP2515=0
+elif [[ $dialog_result == *"Disable"* ]]; then
+  UNINSTALL_MCP2515=1
 fi
 
-# Check if dialog_result includes "RS485"
+# Ask about RS485
 
-if [[ $dialog_result == *"RS485"* ]]; then
+do_dialog_rs485
+
+if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_SC16IS752=1
-else
-  INSTALL_SC16IS752=0
+elif [[ $dialog_result == *"Disable"* ]]; then
+  UNINSTALL_SC16IS752=1
 fi
 
 # I2C is needed for SH-RPi - enable unconditionaly
@@ -266,7 +297,7 @@ if [ $INSTALL_RTC -eq 1 ]; then
   else
     echo "PCF8563 real-time clock device not detected or already installed. Skipping."
   fi
-else
+elif [ $UNINSTALL_RTC -eq 1 ]; then
   echo "Disabling PCF8563 real-time clock device overlay"
   do_overlay i2c-rtc,pcf8563 1
   rtc_uninstall
@@ -276,7 +307,7 @@ fi
 if [ $INSTALL_MCP2515 -eq 1 ] || [ $INSTALL_SC16IS752 -eq 1 ]; then
   echo "Enabling SPI"
   set_config_var dtparam=spi on $CONFIG
-else
+elif [ $UNINSTALL_MCP2515 -eq 1 ] && [ $UNINSTALL_SC16IS752 -eq 1 ]; then
   echo "Disabling SPI"
   set_config_var dtparam=spi off $CONFIG
 fi
@@ -289,7 +320,7 @@ if [ $INSTALL_MCP2515 -eq 1 ]; then
     echo "Installing CAN interface file"
     install -o root can0.interface $CAN_INTERFACE_FILE
   fi
-else
+elif [ $UNINSTALL_MCP2515 -eq 1 ]; then
   echo "Disabling the MCP2515 overlay"
   do_overlay mcp2515-can0,oscillator=16000000,interrupt=23 1
 
@@ -303,7 +334,7 @@ fi
 if [ $INSTALL_SC16IS752 -eq 1 ]; then
   echo "Installing the SC16IS752 overlay"
   do_overlay dtoverlay=sc16is752-spi1,int_pin=24 0
-else
+elif [ $UNINSTALL_SC16IS752 -eq 1 ]; then
   echo "Disabling the SC16IS752 overlay"
   do_overlay dtoverlay=sc16is752-spi1,int_pin=24 1
 fi
