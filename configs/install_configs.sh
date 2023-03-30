@@ -184,9 +184,9 @@ NOTE: Enabling the interface without the hardware present will significantly \
 degrade the Pi performance. \n\
 \n\
 Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
-    "Enable" "Enable the CAN interface" ON \
+    "Enable" "Enable the CAN interface" off \
     "Disable" "Disable the CAN interface" off \
-    "Skip" "Do not change the CAN setting" off
+    "Skip" "Do not change the CAN setting" ON
 }
 
 do_dialog_rs485() {
@@ -198,9 +198,9 @@ This will allow the Pi to communicate with compatible devices such as \
 NMEA 0183 or Modbus RTU. \n\
 \n\
 Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
-    "Enable" "Enable the RS485 interface" ON \
+    "Enable" "Enable the RS485 interface" off \
     "Disable" "Disable the RS485 interface" off \
-    "Skip" "Do not change the RS485 setting" off
+    "Skip" "Do not change the RS485 setting" ON
 }
 
 do_dialog() {
