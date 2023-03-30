@@ -158,13 +158,15 @@ rtc_uninstall() {
 do_dialog_rtc() {
   do_dialog --backtitle "Hat Labs Ltd" \
     --title "RTC" \
-    --checklist "Would you like to enable the on-board Real-time Clock? \n\
+    --radiolist "Would you like to enable the on-board Real-time Clock? \
 This will allow the Pi to keep time even when it is not connected to the internet. \n\
 \n\
-Normally, you would want to always enable this. \n\
-Only disable the RTC if you are using a baseboard with built-in RTC. \n\
-In this case, you will need to disable the RTC on SH-RPi. \n\
-See the documentation for more information." 20 61 5 \
+Normally, you would want to always enable this. \
+Only disable the RTC if you are using your own baseboard with built-in RTC. \
+In this case, you will need to disable the RTC on the SH-RPi hardware. \
+See the documentation for more information. \n\
+\n\
+Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
     "Enable" "Enable the on-board Real-time Clock" ON \
     "Disable" "Disable the on-board Real-time Clock" off \
     "Skip" "Do not change the RTC setting" off
@@ -173,12 +175,15 @@ See the documentation for more information." 20 61 5 \
 do_dialog_can() {
   do_dialog --backtitle "Hat Labs Ltd" \
     --title "CAN" \
-    --checklist "Would you like to enable the CAN interface? \n\
-Select this option if you got the Waveshare 2-Channel Isolated CAN HAT. \n\
-This will allow the Pi to communicate with a CAN network such as \n\
+    --radiolist "Would you like to enable the CAN interface? \n\
+Select this option if you got the Waveshare 2-Channel Isolated CAN HAT. \
+This will allow the Pi to communicate with a CAN network such as \
 NMEA 2000 or J1939. \n\
-NOTE: Enabling the interface without the hardware will significantly \n\
-degrade the Pi performance." 20 61 5 \
+\n\
+NOTE: Enabling the interface without the hardware present will significantly \
+degrade the Pi performance. \n\
+\n\
+Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
     "Enable" "Enable the CAN interface" ON \
     "Disable" "Disable the CAN interface" off \
     "Skip" "Do not change the CAN setting" off
@@ -187,10 +192,12 @@ degrade the Pi performance." 20 61 5 \
 do_dialog_rs485() {
   do_dialog --backtitle "Hat Labs Ltd" \
     --title "RS485" \
-    --checklist "Would you like to enable the RS485 interface? \n\
-Select this option if you got the Waveshare 2-Channel Isolated RS485 HAT. \n\
-This will allow the Pi to communicate with compatible devices such as \n\
-NMEA 0183 or Modbus RTU." 20 61 5 \
+    --radiolist "Would you like to enable the RS485 interface? \
+Select this option if you got the Waveshare 2-Channel Isolated RS485 HAT. \
+This will allow the Pi to communicate with compatible devices such as \
+NMEA 0183 or Modbus RTU. \n\
+\n\
+Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
     "Enable" "Enable the RS485 interface" ON \
     "Disable" "Disable the RS485 interface" off \
     "Skip" "Do not change the RS485 setting" off
@@ -256,8 +263,13 @@ do_dialog_rtc
 
 if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_RTC=1
+  UNINSTALL_RTC=0
 elif [[ $dialog_result == *"Disable"* ]]; then
+  INSTALL_RTC=0
   UNINSTALL_RTC=1
+else
+  INSTALL_RTC=0
+  UNINSTALL_RTC=0
 fi
 
 # Ask about CAN
@@ -266,8 +278,13 @@ do_dialog_can
 
 if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_MCP2515=1
+  UNINSTALL_MCP2515=0
 elif [[ $dialog_result == *"Disable"* ]]; then
+  INSTALL_MCP2515=0
   UNINSTALL_MCP2515=1
+else
+  INSTALL_MCP2515=0
+  UNINSTALL_MCP2515=0
 fi
 
 # Ask about RS485
@@ -276,8 +293,13 @@ do_dialog_rs485
 
 if [[ $dialog_result == *"Enable"* ]]; then
   INSTALL_SC16IS752=1
+  UNINSTALL_SC16IS752=0
 elif [[ $dialog_result == *"Disable"* ]]; then
+  INSTALL_SC16IS752=0
   UNINSTALL_SC16IS752=1
+else
+  INSTALL_SC16IS752=0
+  UNINSTALL_SC16IS752=0
 fi
 
 # I2C is needed for SH-RPi - enable unconditionaly
@@ -339,4 +361,4 @@ elif [ $UNINSTALL_SC16IS752 -eq 1 ]; then
   do_overlay dtoverlay=sc16is752-spi1,int_pin=24 1
 fi
 
-echo "DONE. Reboot the system to enable the new devices."
+echo "DONE. Reboot the apply the new settings."
