@@ -86,10 +86,8 @@ do_i2c() {
   RET=$1
   if [ $RET -eq 0 ]; then
     SETTING=on
-    STATUS=enabled
   elif [ $RET -eq 1 ]; then
     SETTING=off
-    STATUS=disabled
   else
     return $RET
   fi
@@ -116,30 +114,26 @@ get_overlay() {
   fi
 }
 
-do_overlay() {
-  ov=$1
-  RET=$2
-  DEFAULT=--defaultno
-  CURRENT=0
-  if [ $(get_overlay $ov) -eq 0 ]; then
-    DEFAULT=
-    CURRENT=1
-  fi
-  if [ $RET -eq $CURRENT ]; then
-    ASK_TO_REBOOT=1
-  fi
-  if [ $RET -eq 0 ]; then
-    sed $CONFIG -i -e "s/^#dtoverlay=$ov/dtoverlay=$ov/"
-    if ! grep -q -E "^dtoverlay=$ov" $CONFIG; then
-      printf "dtoverlay=$ov\n" >>$CONFIG
+function enable_config_line() {
+    local line="$1"
+    local file="$2"
+    if grep -q "$line" "$file"; then
+        if grep -q "^#.*$line" "$file"; then
+            sed -i "s/^#\($line\)/\1/" "$file"
+        fi
+    else
+        echo "$line" | tee -a "$file" > /dev/null
     fi
-    STATUS=enabled
-  elif [ $RET -eq 1 ]; then
-    sed $CONFIG -i -e "s/^dtoverlay=$ov/#dtoverlay=$ov/"
-    STATUS=disabled
-  else
-    return $RET
-  fi
+}
+
+function disable_config_line() {
+    local line="$1"
+    local file="$2"
+    if grep -q "$line" "$file"; then
+        if ! grep -q "^#.*$line" "$file"; then
+            sed -i "s/^\($line\)/#\1/" "$file"
+        fi
+    fi
 }
 
 rtc_install() {
@@ -201,6 +195,19 @@ Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
     "Enable" "Enable the RS485 interface" off \
     "Disable" "Disable the RS485 interface" off \
     "Skip" "Do not change the RS485 setting" ON
+}
+
+do_dialog_maxm8q() {
+  do_dialog --backtitle "Hat Labs Ltd" \
+    --title "MAX-M8Q GNSS HAT" \
+    --radiolist "Would you like to enable the MAX-M8Q GNSS (GPS) HAT? \
+Select this option if you got the MAX-M8Q GNSS HAT. \
+This will allow the Pi to communicate with the GNSS receiver. \n\
+\n\
+Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
+    "Enable" "Enable the MAX-M8Q GNSS HAT" off \
+    "Disable" "Disable the MAX-M8Q GNSS HAT" off \
+    "Skip" "Do not change the MAX-M8Q GNSS HAT setting" ON
 }
 
 do_dialog() {
@@ -302,26 +309,41 @@ else
   UNINSTALL_SC16IS752=0
 fi
 
+# Ask about MAX-M8Q GNSS HAT
+
+do_dialog_maxm8q
+
+if [[ $dialog_result == *"Enable"* ]]; then
+  INSTALL_MAXM8Q=1
+  UNINSTALL_MAXM8Q=0
+elif [[ $dialog_result == *"Disable"* ]]; then
+  INSTALL_MAXM8Q=0
+  UNINSTALL_MAXM8Q=1
+else
+  INSTALL_MAXM8Q=0
+  UNINSTALL_MAXM8Q=0
+fi
+
 # I2C is needed for SH-RPi - enable unconditionaly
 echo "Enabling I2C"
 do_i2c 0
 
 # This is required for proper SH-RPi operation
 echo "Installing the GPIO poweroff detection overlay"
-do_overlay gpio-poweroff,gpiopin=2,input,active_low=17 0
+enable_config_line "dtoverlay=gpio-poweroff,gpiopin=2,input,active_low=17" $CONFIG
 
 if [ $INSTALL_RTC -eq 1 ]; then
   # only install the pcf8563 configuration if the device is detected
   if detect_i2c_device '(51)|(50: -- UU)'; then
     echo "Installing PCF8563 real-time clock device overlay"
-    do_overlay i2c-rtc,pcf8563 0
+    enable_config_line "dtoverlay=i2c-rtc,pcf8563" $CONFIG
     rtc_install
   else
     echo "PCF8563 real-time clock device not detected or already installed. Skipping."
   fi
 elif [ $UNINSTALL_RTC -eq 1 ]; then
   echo "Disabling PCF8563 real-time clock device overlay"
-  do_overlay i2c-rtc,pcf8563 1
+  disable_config_line "dtoverlay=i2c-rtc,pcf8563" $CONFIG
   rtc_uninstall
 fi
 
@@ -336,7 +358,7 @@ fi
 
 if [ $INSTALL_MCP2515 -eq 1 ]; then
   echo "Installing the MCP2515 overlay"
-  do_overlay mcp2515-can0,oscillator=16000000,interrupt=23 0
+  enable_config_line "dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=23" $CONFIG
 
   if [ ! -f $CAN_INTERFACE_FILE ]; then
     echo "Installing CAN interface file"
@@ -344,7 +366,7 @@ if [ $INSTALL_MCP2515 -eq 1 ]; then
   fi
 elif [ $UNINSTALL_MCP2515 -eq 1 ]; then
   echo "Disabling the MCP2515 overlay"
-  do_overlay mcp2515-can0,oscillator=16000000,interrupt=23 1
+  disable_config_line "dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=23" $CONFIG
 
   if [ -f $CAN_INTERFACE_FILE ]; then
     echo "Removing CAN interface file"
@@ -355,10 +377,35 @@ fi
 # Enable the SC16IS752 overlay if requested
 if [ $INSTALL_SC16IS752 -eq 1 ]; then
   echo "Installing the SC16IS752 overlay"
-  do_overlay dtoverlay=sc16is752-spi1,int_pin=24 0
+  enable_config_line "dtoverlay=sc16is752-spi1,int_pin=24" $CONFIG
 elif [ $UNINSTALL_SC16IS752 -eq 1 ]; then
   echo "Disabling the SC16IS752 overlay"
-  do_overlay dtoverlay=sc16is752-spi1,int_pin=24 1
+  disable_config_line "dtoverlay=sc16is752-spi1,int_pin=24" $CONFIG
 fi
+
+# Enable the MAX-M8Q GNSS HAT settings if requested
+if [ $INSTALL_MAXM8Q -eq 1 ]; then
+  echo "Enabling UART"
+  enable_config_line "enable_uart=1" $CONFIG
+  echo Disabling Bluetooth
+  enable_config_line "dtoverlay=disable-bt" $CONFIG
+  systemctl disable hciuart
+  echo Disabling serial console
+
+  # Check if console=serial0,115200 is already removed
+  if grep -q "console=serial0,115200 " /boot/cmdline.txt; then
+    # Remove console=serial0,115200
+    sed -i 's/console=serial0,115200 //g' /boot/cmdline.txt
+  fi
+
+elif [ $UNINSTALL_MAXM8Q -eq 1 ]; then
+  echo "Disabling UART"
+  disable_config_line "enable_uart=1" $CONFIG
+  echo Enabling Bluetooth
+  disable_config_line "dtoverlay=disable-bt" $CONFIG
+  systemctl enable hciuart
+  # We are not re-enabling serial console here...
+fi
+
 
 echo "DONE. Reboot the apply the new settings."
