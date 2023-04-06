@@ -197,6 +197,19 @@ Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
     "Skip" "Do not change the RS485 setting" ON
 }
 
+do_dialog_maxm8q() {
+  do_dialog --backtitle "Hat Labs Ltd" \
+    --title "MAX-M8Q GNSS HAT" \
+    --radiolist "Would you like to enable the MAX-M8Q GNSS (GPS) HAT? \
+Select this option if you got the MAX-M8Q GNSS HAT. \
+This will allow the Pi to communicate with the GNSS receiver. \n\
+\n\
+Press SPACE to select, ENTER to accept selection and ESC to cancel." 20 75 3 \
+    "Enable" "Enable the MAX-M8Q GNSS HAT" off \
+    "Disable" "Disable the MAX-M8Q GNSS HAT" off \
+    "Skip" "Do not change the MAX-M8Q GNSS HAT setting" ON
+}
+
 do_dialog() {
   : "${DIALOG=dialog}"
 
@@ -296,6 +309,21 @@ else
   UNINSTALL_SC16IS752=0
 fi
 
+# Ask about MAX-M8Q GNSS HAT
+
+do_dialog_maxm8q
+
+if [[ $dialog_result == *"Enable"* ]]; then
+  INSTALL_MAXM8Q=1
+  UNINSTALL_MAXM8Q=0
+elif [[ $dialog_result == *"Disable"* ]]; then
+  INSTALL_MAXM8Q=0
+  UNINSTALL_MAXM8Q=1
+else
+  INSTALL_MAXM8Q=0
+  UNINSTALL_MAXM8Q=0
+fi
+
 # I2C is needed for SH-RPi - enable unconditionaly
 echo "Enabling I2C"
 do_i2c 0
@@ -354,5 +382,30 @@ elif [ $UNINSTALL_SC16IS752 -eq 1 ]; then
   echo "Disabling the SC16IS752 overlay"
   disable_config_line "dtoverlay=sc16is752-spi1,int_pin=24" $CONFIG
 fi
+
+# Enable the MAX-M8Q GNSS HAT settings if requested
+if [ $INSTALL_MAXM8Q -eq 1 ]; then
+  echo "Enabling UART"
+  enable_config_line "enable_uart=1" $CONFIG
+  echo Disabling Bluetooth
+  enable_config_line "dtoverlay=disable-bt" $CONFIG
+  systemctl disable hciuart
+  echo Disabling serial console
+
+  # Check if console=serial0,115200 is already removed
+  if grep -q "console=serial0,115200 " /boot/cmdline.txt; then
+    # Remove console=serial0,115200
+    sed -i 's/console=serial0,115200 //g' /boot/cmdline.txt
+  fi
+
+elif [ $UNINSTALL_MAXM8Q -eq 1 ]; then
+  echo "Disabling UART"
+  disable_config_line "enable_uart=1" $CONFIG
+  echo Enabling Bluetooth
+  disable_config_line "dtoverlay=disable-bt" $CONFIG
+  systemctl enable hciuart
+  # We are not re-enabling serial console here...
+fi
+
 
 echo "DONE. Reboot the apply the new settings."
