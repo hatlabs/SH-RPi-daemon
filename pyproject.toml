@@ -41,7 +41,7 @@ smbus2 = "^0.4.2"
 loguru = "^0.6.0"
 aiohttp = "^3.8.3"
 arrow = "^1.2.3"
-rich = "^13.3.1"
+rich = "^13.3.4"
 typer = "^0.7.0"
 
 [tool.poetry.dev-dependencies]
