@@ -1,15 +1,18 @@
-FROM python:3.9-slim-buster
+FROM python:3.8-slim-buster
 
 ENV LANG=C.UTF-8 \
   LC_ALL=C.UTF-8 \
   PATH="${PATH}:/root/.poetry/bin"
+
+WORKDIR /app/
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends \
   curl \
   && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml ./
+COPY pyproject.toml poetry.lock README.md ./
+COPY src/ ./src/
 
 # Install Poetry
 RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | POETRY_HOME=/opt/poetry python && \
@@ -19,7 +22,7 @@ RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/inst
 
 # Allow installing dev dependencies to run tests
 ARG INSTALL_DEV=false
-RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install --no-root ; else poetry install --no-root --no-dev ; fi"
+RUN bash -c "if [ $INSTALL_DEV == 'true' ] ; then poetry install ; else poetry install --no-dev ; fi"
 
-CMD mkdir -p /workspace
-WORKDIR /workspace
+CMD [ "/usr/local/bin/shrpid" ]
+
