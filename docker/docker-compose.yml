@@ -1,0 +1,11 @@
+version: '3.6'
+services:
+  shrpid:
+    image: shrpid:latest
+    privileged: true
+    volumes:
+      - /var/run:/var/run
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
