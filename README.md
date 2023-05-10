@@ -47,6 +47,21 @@ Copy and paste the following lines to your terminal to install the latest versio
         https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install-online.sh \
         | sudo bash
 
+### Using Docker
+
+If you prefer to use Docker to run the daemon, you can clone the repo and issue the following commands:
+
+    docker compose -f docker/docker-compose.yml build
+    docker compose -d -f docker/docker-compose.yml up
+
+If you have previously installed the daemon using the `install-online.sh` script, you need to stop and disable the daemon on your system by issuing the following command:
+
+    sudo systemctl disable --now shrpid
+
+Before starting the Docker container, you need to manually enable I2C on your Raspberry Pi by issuing the following command:
+
+    sudo raspi-config nonint do_i2c 0
+
 ## SH-RPi documentation
 
 For a more detailed SH-RPi documentation, please visit the [documentation website](https://docs.hatlabs.fi/sh-rpi).
