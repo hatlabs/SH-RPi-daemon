@@ -38,7 +38,7 @@ shrpi = "shrpi.__main__:cli"
 [tool.poetry.dependencies]
 python = "^3.8"
 smbus2 = "^0.4.2"
-loguru = "^0.6.0"
+loguru = "^0.7.0"
 aiohttp = "^3.8.3"
 arrow = "^1.2.3"
 rich = "^13.3.1"
