@@ -1,3 +1,6 @@
+# Config file for SH-RPi daemon
+CONFIG_FILE_LOCATION = "/etc/shrpid.conf"
+
 # Default I2C bus for Raspberry Pi
 I2C_BUS = 1
 

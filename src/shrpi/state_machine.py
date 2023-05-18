@@ -53,10 +53,11 @@ async def run_state_machine(
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
             if dry_run:
-                logger.warning("Would execute /sbin/poweroff")
+                logger.warning(f"Would execute {poweroff}")
             else:
                 # inform the hat about this sad state of affairs
                 shrpi_device.request_shutdown()
+                logger.info(f"Executing {poweroff}")
                 check_call(["sudo", poweroff])
             state = "DEAD"
         elif state == "DEAD":

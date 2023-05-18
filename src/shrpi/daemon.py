@@ -6,9 +6,11 @@ import pathlib
 import signal
 import sys
 
+import yaml
 from loguru import logger
 
 from shrpi.const import (
+    CONFIG_FILE_LOCATION,
     DEFAULT_BLACKOUT_TIME_LIMIT,
     DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
     I2C_ADDR,
@@ -17,6 +19,24 @@ from shrpi.const import (
 from shrpi.i2c import SHRPiDevice
 from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
+
+
+def read_config_files(parser: argparse.ArgumentParser, paths: list[str]):
+    """Read the config file."""
+
+    for path in paths:
+        try:
+            with open(path, "r") as f:
+                config = yaml.safe_load(f)
+                parser.set_defaults(**config)
+        except FileNotFoundError:
+            logger.error(f"Config file not found: {path}")
+            sys.exit(1)
+        except yaml.YAMLError as e:
+            logger.error(f"Error parsing config file: {e!s}")
+            sys.exit(1)
+
+    return config
 
 
 def parse_arguments():
@@ -58,8 +78,19 @@ def parse_arguments():
         default="/sbin/poweroff",
         help="Command to call to power off the system",
     )
+    parser.add_argument("--conf", action="append", help="Configuration file location")
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.conf is not None:
+        read_config_files(parser, args.conf)
+    elif os.path.exists(CONFIG_FILE_LOCATION):
+        read_config_files(parser, [CONFIG_FILE_LOCATION])
+
+    # Reload arguments to override config file values with command line values
+    args = parser.parse_args()
+
+    return args
 
 
 async def wait_forever():
@@ -130,8 +161,15 @@ async def async_main():
 
     # run these with asyncio:
 
-    coro1 = run_state_machine(shrpi_device, blackout_time_limit, blackout_voltage_limit, poweroff=args.poweroff)
-    coro2 = run_http_server(shrpi_device, socket_path, socket_group)
+    coro1 = run_state_machine(
+        shrpi_device,
+        blackout_time_limit,
+        blackout_voltage_limit,
+        poweroff=args.poweroff,
+    )
+    coro2 = run_http_server(
+        shrpi_device, socket_path, socket_group, poweroff=args.poweroff
+    )
     coro3 = wait_forever()
 
     await asyncio.gather(coro1, coro2, coro3)
