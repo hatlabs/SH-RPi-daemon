@@ -62,6 +62,17 @@ Before starting the Docker container, you need to manually enable I2C on your Ra
 
     sudo raspi-config nonint do_i2c 0
 
+## Configuration
+
+The `shrpid` daemon can be configured using a configuration file. The default configuration file is located at `/etc/shrpid.conf`. The configuration file is in YAML format. The configuration keys are the same as daemon command line arguments that can be seen by issuing the following command:
+
+    shrpid --help
+
+For example, if you want to change the blackout time limit to 10 seconds andthe poweroff command to `/home/pi/bin/custom-poweroff`, you can edit the configuration file as follows:
+
+    blackout-time-limit: 10
+    poweroff: /home/pi/bin/custom-poweroff
+
 ## SH-RPi documentation
 
 For a more detailed SH-RPi documentation, please visit the [documentation website](https://docs.hatlabs.fi/sh-rpi).
