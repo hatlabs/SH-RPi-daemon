@@ -52,6 +52,12 @@ def parse_arguments():
     parser.add_argument(
         "-n", default=False, action="store_true", help="Dry run (no shutdown)"
     )
+    parser.add_argument(
+        "--poweroff",
+        type=str,
+        default="/sbin/poweroff",
+        help="Command to call to power off the system",
+    )
 
     return parser.parse_args()
 
@@ -124,7 +130,7 @@ async def async_main():
 
     # run these with asyncio:
 
-    coro1 = run_state_machine(shrpi_device, blackout_time_limit, blackout_voltage_limit)
+    coro1 = run_state_machine(shrpi_device, blackout_time_limit, blackout_voltage_limit, poweroff=args.poweroff)
     coro2 = run_http_server(shrpi_device, socket_path, socket_group)
     coro3 = wait_forever()
 
