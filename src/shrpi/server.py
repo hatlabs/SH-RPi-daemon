@@ -8,14 +8,16 @@ import pathlib
 
 import arrow
 from aiohttp import web
+from loguru import logger
 
 import shrpi.const
 import shrpi.i2c
 
 
 class RouteHandlers:
-    def __init__(self, shrpi_device: shrpi.i2c.SHRPiDevice):
+    def __init__(self, shrpi_device: shrpi.i2c.SHRPiDevice, poweroff_command: str):
         self.shrpi_device = shrpi_device
+        self.poweroff_command = poweroff_command
 
     async def get_root(self, request: web.Request):
         return web.Response(text="This is shrpid!\n")
@@ -52,7 +54,8 @@ class RouteHandlers:
         """Receive a shutdown request from the client."""
         self.shrpi_device.request_shutdown()  # Inform the device about the shutdown
         # call the system shutdown command
-        asyncio.create_task(asyncio.create_subprocess_exec("shutdown", "-h", "now"))
+        logger.info(f"Executing {self.poweroff_command}")
+        asyncio.create_task(asyncio.create_subprocess_shell(self.poweroff_command))
 
         return web.Response(status=204)
 
@@ -190,10 +193,11 @@ async def run_http_server(
     shrpi_device: shrpi.i2c.SHRPiDevice,
     socket_path: pathlib.PosixPath,
     socket_group: int,
+    poweroff: str,
 ):
     """Run the HTTP server."""
 
-    handlers = RouteHandlers(shrpi_device)
+    handlers = RouteHandlers(shrpi_device, poweroff_command=poweroff)
 
     app = web.Application()
     app.add_routes(

@@ -12,6 +12,7 @@ async def run_state_machine(
     blackout_time_limit: float,
     blackout_voltage_limit: float,
     dry_run=False,
+    poweroff="/sbin/poweroff",
 ):
     state = "START"
     blackout_time = 0.0
@@ -52,11 +53,12 @@ async def run_state_machine(
                 state = "SHUTDOWN"
         elif state == "SHUTDOWN":
             if dry_run:
-                logger.warning("Would execute /sbin/poweroff")
+                logger.warning(f"Would execute {poweroff}")
             else:
                 # inform the hat about this sad state of affairs
                 shrpi_device.request_shutdown()
-                check_call(["sudo", "/sbin/poweroff"])
+                logger.info(f"Executing {poweroff}")
+                check_call(["sudo", poweroff])
             state = "DEAD"
         elif state == "DEAD":
             # just wait for the inevitable

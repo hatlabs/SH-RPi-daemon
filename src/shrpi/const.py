@@ -1,3 +1,6 @@
+# Config file for SH-RPi daemon
+CONFIG_FILE_LOCATION = "/etc/shrpid.conf"
+
 # Default I2C bus for Raspberry Pi
 I2C_BUS = 1
 
@@ -19,4 +22,4 @@ TEMP_MAX = 512.0  # in Kelvin
 
 # Daemon version
 
-VERSION = "2.0.1"
+VERSION = "2.1.0"
