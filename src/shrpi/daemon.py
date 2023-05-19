@@ -15,6 +15,7 @@ from shrpi.const import (
     DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
     I2C_ADDR,
     I2C_BUS,
+    VERSION,
 )
 from shrpi.i2c import SHRPiDevice
 from shrpi.server import run_http_server
@@ -154,10 +155,13 @@ async def async_main():
         # delete the socket file
         if socket_path.exists():
             socket_path.unlink()
+        logger.info("shrpid exiting")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, cleanup)
     signal.signal(signal.SIGTERM, cleanup)
+
+    logger.info(f"Starting shrpid version {VERSION} on {socket_path}")
 
     # run these with asyncio:
 
