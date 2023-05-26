@@ -17,7 +17,7 @@ from shrpi.const import (
     I2C_BUS,
     VERSION,
 )
-from shrpi.i2c import SHRPiDevice
+from shrpi.i2c import SHRPiDevice, DeviceNotFoundError
 from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
 
@@ -105,9 +105,18 @@ async def async_main():
     i2c_bus = args.i2c_bus
     i2c_addr = args.i2c_addr
 
-    # TODO: should test that the device is responding and has correct firmware
+    try:
+        shrpi_device = SHRPiDevice.factory(i2c_bus, i2c_addr)
+    except DeviceNotFoundError as e:
+        logger.error(f"Error: {e}")
+        sys.exit(1)
 
-    shrpi_device = SHRPiDevice(i2c_bus, i2c_addr)
+    hw_version = shrpi_device.hardware_version()
+    fw_version = shrpi_device.firmware_version()
+    logger.info(
+        f"SH-RPi device detected; HW version {hw_version}, FW version {fw_version}"
+    )
+
 
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit

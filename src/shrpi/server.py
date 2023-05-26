@@ -61,6 +61,13 @@ class RouteHandlers:
 
     async def post_sleep(self, request: web.Request):
         """Receive a sleep request from the client."""
+
+        if self.shrpi_device.firmware_version().startswith("1."):
+            return web.Response(
+                status=400,
+                text="Sleep mode is not supported in firmware version 1.x",
+            )
+
         now = arrow.utcnow()
 
         timestamp = 0
@@ -149,6 +156,11 @@ class RouteHandlers:
         elif key == "power_off_threshold":
             self.shrpi_device.set_power_off_threshold(data)
         elif key == "led_brightness":
+            if self.shrpi_device.firmware_version().startswith("1."):
+                return web.Response(
+                    status=400,
+                    text="LED brightness is not supported in hardware version 1.x",
+                )
             self.shrpi_device.set_led_brightness(int(data))
         else:
             return web.Response(status=404)

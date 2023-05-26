@@ -2,7 +2,7 @@ from enum import Enum
 
 from smbus2 import SMBus
 
-from shrpi.const import DCIN_MAX, I_MAX, TEMP_MAX, VCAP_MAX
+import shrpi.const
 
 
 class States(Enum):
@@ -26,6 +26,9 @@ class States(Enum):
     SLEEP = 17
 
 
+class DeviceNotFoundError(Exception):
+    pass
+
 class SHRPiDevice:
     def __init__(self, bus, addr):
         self.bus = bus
@@ -34,6 +37,28 @@ class SHRPiDevice:
         self._firmware_version = "Unknown"
         self.read_analog = self.read_analog_byte  # default to v1 protocol
         self.write_analog = self.write_analog_byte  # default to v1 protocol
+
+        self.hardware_version()  # force hardware version detection
+        self.firmware_version()  # force firmware version detection
+
+        self.vcap_max = 0.
+        self.dcin_max = 0.
+        self.i_max = 0.
+        self.temp_max = 0.
+
+    @classmethod
+    def factory(cls, bus, addr):
+        temp_device = cls(bus, addr)
+        hw_ver = temp_device.hardware_version()
+
+        try:
+            if hw_ver.startswith("1."):
+                device = SHRPiV1Device(bus, addr)
+            else:
+                device = SHRPiV2Device(bus, addr)
+            return device
+        except (IOError, OSError):
+            raise DeviceNotFoundError("SH-RPi not found at I2C address %s" % addr)
 
     def i2c_query_byte(self, reg):
         with SMBus(self.bus) as bus:
@@ -67,7 +92,7 @@ class SHRPiDevice:
         with SMBus(self.bus) as bus:
             bus.write_i2c_block_data(self.addr, reg, vals)
 
-    def _set_hardware_version(self, version):
+    def _set_hardware_version(self, version: str):
         self._hardware_version = version
 
     def _set_firmware_version(self, version):
@@ -88,7 +113,10 @@ class SHRPiDevice:
     def write_analog_word(self, reg, val, scale):
         self.i2c_write_word(reg, int(65536 * val / scale))
 
-    def hardware_version(self):
+    def hardware_version(self) -> str:
+        if self._hardware_version != "Unknown":
+            return self._hardware_version
+
         legacy_version = self.i2c_query_byte(0x01)
         if legacy_version != 0xFF:
             version_string = f"1.0.{legacy_version}"
@@ -100,7 +128,10 @@ class SHRPiDevice:
         self._set_hardware_version(version_string)
         return version_string
 
-    def firmware_version(self):
+    def firmware_version(self) -> str:
+        if self._firmware_version != "Unknown":
+            return self._firmware_version
+
         legacy_version = self.i2c_query_byte(0x02)
         if legacy_version != 0xFF:
             version_string = f"1.0.{legacy_version}"
@@ -130,45 +161,25 @@ class SHRPiDevice:
             self.i2c_write_byte(0x12, int(10 * timeout))
 
     def power_on_threshold(self):
-        return self.read_analog(0x13, VCAP_MAX)
+        return self.read_analog(0x13, self.vcap_max)
 
     def set_power_on_threshold(self, threshold):
-        self.write_analog(0x13, threshold, VCAP_MAX)
+        self.write_analog(0x13, threshold, self.vcap_max)
 
     def power_off_threshold(self):
-        return self.read_analog(0x14, VCAP_MAX)
+        return self.read_analog(0x14, self.vcap_max)
 
     def set_power_off_threshold(self, threshold):
-        self.write_analog(0x14, threshold, VCAP_MAX)
+        self.write_analog(0x14, threshold, self.vcap_max)
 
     def state(self):
         return States(self.i2c_query_byte(0x15)).name
 
-    def led_brightness(self):
-        return self.i2c_query_byte(0x17)
-
-    def set_led_brightness(self, brightness):
-        self.i2c_write_byte(0x17, brightness)
-
     def dcin_voltage(self):
-        return self.read_analog(0x20, DCIN_MAX)
+        return self.read_analog(0x20, self.dcin_max)
 
     def supercap_voltage(self):
-        return self.read_analog(0x21, VCAP_MAX)
-
-    def input_current(self):
-        if self._firmware_version.startswith("2."):
-            return self.read_analog(0x22, I_MAX)
-        else:
-            # input current measurement not supported in v1 hardware
-            return None
-
-    def temperature(self):
-        if self._firmware_version.startswith("2."):
-            return self.read_analog(0x23, TEMP_MAX)
-        else:
-            # temperature measurement not supported in v1 firmware
-            return None
+        return self.read_analog(0x21, self.vcap_max)
 
     def request_shutdown(self):
         self.i2c_write_byte(0x30, 0x01)
@@ -178,3 +189,67 @@ class SHRPiDevice:
 
     def watchdog_elapsed(self):
         return 0.1 * self.i2c_query_byte(0x16)
+
+    def led_brightness(self):
+        raise NotImplementedError("LED brightness not implemented in base class")
+
+    def set_led_brightness(self, brightness):
+        raise NotImplementedError("LED brightness not implemented in base class")
+
+    def input_current(self):
+        raise NotImplementedError("Input current not implemented in base class")
+
+    def temperature(self):
+        raise NotImplementedError("Temperature not implemented in base class")
+
+
+class SHRPiV1Device(SHRPiDevice):
+    """
+    Device interface for SH-RPi v1 hardware.
+    """
+    def __init__(self, bus=1, addr=0x6D):
+        super().__init__(bus, addr)
+        self.vcap_max = 2.75
+        self.dcin_max = 32.1
+
+    def led_brightness(self):
+        return None
+
+    def set_led_brightness(self, brightness):
+        raise NotImplementedError("LED brightness not supported in v1 firmware")
+
+    def input_current(self):
+        return None
+
+    def temperature(self):
+        return None
+
+
+class SHRPiV2Device(SHRPiDevice):
+    """
+    Device interface for SH-RPi v2 hardware.
+    """
+    def __init__(self, bus=1, addr=0x6D):
+        super().__init__(bus, addr)
+        self.vcap_max = 9.35
+        self.dcin_max = 32.1
+        self.i_max = 2.5
+        self.temp_max = 512.0  # in Kelvin
+
+    def watchdog_timeout(self):
+        return self.i2c_query_word(0x12) / 1000
+
+    def set_watchdog_timeout(self, timeout):
+        self.i2c_write_word(0x12, int(1000 * timeout))
+
+    def led_brightness(self):
+        return self.i2c_query_byte(0x17)
+
+    def set_led_brightness(self, brightness):
+        self.i2c_write_byte(0x17, brightness)
+
+    def input_current(self):
+        return self.read_analog(0x22, self.i_max)
+
+    def temperature(self):
+        return self.read_analog(0x23, self.temp_max)
