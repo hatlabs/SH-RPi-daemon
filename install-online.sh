@@ -22,6 +22,9 @@ fi
 REPOURL="${1-}"
 BRANCH="${2-}"
 
+shift
+shift
+
 if [ -z "$REPOURL" ] ; then
     REPOURL="https://github.com/hatlabs/SH-RPi-daemon"
 fi
@@ -46,4 +49,4 @@ curl -L \
 tar zxvf SH-RPi-daemon-${BRANCH}.tar.gz
 cd SH-RPi-daemon-${BRANCH}
 
-./install.sh
+./install.sh "$@"

@@ -17,7 +17,7 @@ fi
 # install the device tree overlay and other configuration files
 
 pushd configs
-./install_configs.sh
+./install_configs.sh "$@"
 popd
 
 # install the daemon build dependencies
@@ -33,3 +33,5 @@ pip3 install .
 install -o root shrpid.service /lib/systemd/system
 systemctl daemon-reload
 systemctl enable shrpid
+
+echo "Installation complete. Please reboot the system."
