@@ -33,6 +33,10 @@ fi
 # create a temporary directory for the installation
 
 tmp_dir=$(mktemp -d -t SH-RPi-daemon-XXXXXXXX)
+
+# set up a hook to clean up the temporary directory on exit
+trap 'rm -rf "$tmp_dir"' EXIT
+
 cd $tmp_dir
 
 curl -L \
