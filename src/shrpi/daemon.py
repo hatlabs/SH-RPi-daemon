@@ -114,11 +114,11 @@ async def async_main():
 
     socket_path: pathlib.PosixPath
     if args.socket is None:
-        # if we're root user, we should be able to write to /var/run/shrpi.sock
+        # if we're root user, we should be able to write to /var/run/shrpid.sock
         if os.getuid() == 0:
-            socket_path = pathlib.PosixPath("/var/run/shrpi.sock")
+            socket_path = pathlib.PosixPath("/var/run/shrpid.sock")
         else:
-            socket_path = pathlib.PosixPath.home() / ".shrpi.sock"
+            socket_path = pathlib.PosixPath.home() / ".shrpid.sock"
     else:
         socket_path: pathlib.PosixPath = args.socket
 
