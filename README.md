@@ -14,9 +14,7 @@
 
 > **Note**
 >
-> There are two different versions of SH-RPi. Version 1 was released in 2021 and includes an integrated CAN controller for connecting to the NMEA 2000 bus. It uses different daemon software than version 2. Version 1 software is archived to the <a href="https://github.com/hatlabs/SH-RPi-daemon/tree/v1"><b>v1</b> branch</a> of this repository.
->
-> The description below applies to the current version 2 of SH-RPi. Version 2 is available for purchase at <a href="https://hatlabs.fi/"><b>hatlabs.fi</b></a>.
+> The description below applies to the current version 2 of SH-RPi. Version 2 is available for purchase at <a href="https://hatlabs.fi/"><b>hatlabs.fi</b></a>. The installation script also supports version 1 of SH-RPi even though most of the documentation below is for version 2.
 
 
 ## Introduction
@@ -61,6 +59,19 @@ If you have previously installed the daemon using the `install-online.sh` script
 Before starting the Docker container, you need to manually enable I2C on your Raspberry Pi by issuing the following command:
 
     sudo raspi-config nonint do_i2c 0
+
+### Unattended Installation
+
+Alternatively, it is possible to clone this repo on a Raspberry Pi device and run the `install.sh` script. This will install the daemon and the configuration files. If you want to define the desired configuration without going through the interactive dialogs, they can be defined on the command line as follows:
+
+    sudo ./install.sh --enable RTC,CAN
+
+The above command will enable the RTC and CAN (NMEA 2000) features. The following features are available:
+
+- `RTC`: Enables the real-time-clock
+- `CAN`: Enables the CAN (NMEA 2000) interface
+- `RS485`: Enables the RS485 interface
+- `MAX-M8Q`: Enables the u-blox MAX-M8Q GPS interface
 
 ## Configuration
 
