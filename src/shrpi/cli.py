@@ -72,13 +72,16 @@ async def async_print_all(socket_path: pathlib.Path):
         table.add_row(
             "Power-off threshold", f'{config["power_off_threshold"]:.1f}', "V"
         )
-        table.add_row("LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%")
+        if config["led_brightness"] is not None:
+            table.add_row("LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%")
         table.add_section()
 
         table.add_row("Voltage in", f'{values["V_in"]:.1f}', "V")
-        table.add_row("Current in", f'{values["I_in"]:.2f}', "A")
+        if values["I_in"] is not None:
+            table.add_row("Current in", f'{values["I_in"]:.2f}', "A")
         table.add_row("Supercap voltage", f'{values["V_supercap"]:.2f}', "V")
-        table.add_row("MCU temperature", f'{values["T_mcu"]-273.15:.1f}', "°C")
+        if values["T_mcu"] is not None:
+            table.add_row("MCU temperature", f'{values["T_mcu"]-273.15:.1f}', "°C")
 
         console.print(table)
 

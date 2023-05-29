@@ -22,6 +22,9 @@ fi
 REPOURL="${1-}"
 BRANCH="${2-}"
 
+shift
+shift
+
 if [ -z "$REPOURL" ] ; then
     REPOURL="https://github.com/hatlabs/SH-RPi-daemon"
 fi
@@ -33,6 +36,10 @@ fi
 # create a temporary directory for the installation
 
 tmp_dir=$(mktemp -d -t SH-RPi-daemon-XXXXXXXX)
+
+# set up a hook to clean up the temporary directory on exit
+trap 'rm -rf "$tmp_dir"' EXIT
+
 cd $tmp_dir
 
 curl -L \
@@ -42,4 +49,4 @@ curl -L \
 tar zxvf SH-RPi-daemon-${BRANCH}.tar.gz
 cd SH-RPi-daemon-${BRANCH}
 
-./install.sh
+./install.sh "$@"

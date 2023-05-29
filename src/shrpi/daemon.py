@@ -17,7 +17,7 @@ from shrpi.const import (
     I2C_BUS,
     VERSION,
 )
-from shrpi.i2c import SHRPiDevice
+from shrpi.i2c import SHRPiDevice, DeviceNotFoundError
 from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
 
@@ -105,20 +105,29 @@ async def async_main():
     i2c_bus = args.i2c_bus
     i2c_addr = args.i2c_addr
 
-    # TODO: should test that the device is responding and has correct firmware
+    try:
+        shrpi_device = SHRPiDevice.factory(i2c_bus, i2c_addr)
+    except DeviceNotFoundError as e:
+        logger.error(f"Error: {e}")
+        sys.exit(1)
 
-    shrpi_device = SHRPiDevice(i2c_bus, i2c_addr)
+    hw_version = shrpi_device.hardware_version()
+    fw_version = shrpi_device.firmware_version()
+    logger.info(
+        f"SH-RPi device detected; HW version {hw_version}, FW version {fw_version}"
+    )
+
 
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
 
     socket_path: pathlib.PosixPath
     if args.socket is None:
-        # if we're root user, we should be able to write to /var/run/shrpi.sock
+        # if we're root user, we should be able to write to /var/run/shrpid.sock
         if os.getuid() == 0:
-            socket_path = pathlib.PosixPath("/var/run/shrpi.sock")
+            socket_path = pathlib.PosixPath("/var/run/shrpid.sock")
         else:
-            socket_path = pathlib.PosixPath.home() / ".shrpi.sock"
+            socket_path = pathlib.PosixPath.home() / ".shrpid.sock"
     else:
         socket_path: pathlib.PosixPath = args.socket
 

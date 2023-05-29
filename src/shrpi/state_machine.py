@@ -17,15 +17,6 @@ async def run_state_machine(
     state = "START"
     blackout_time = 0.0
 
-    # Poll hardware and firmware versions. This will set SHRPiDevice in the
-    # correct mode.
-    hw_version = shrpi_device.hardware_version()
-    fw_version = shrpi_device.firmware_version()
-
-    logger.info(
-        f"SH-RPi device detected; HW version {hw_version}, FW version {fw_version}"
-    )
-
     while True:
         # TODO: Provide facilities for reporting the states and voltages
         # en5v_state = dev.en5v_state()
