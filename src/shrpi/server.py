@@ -19,10 +19,10 @@ class RouteHandlers:
         self.shrpi_device = shrpi_device
         self.poweroff_command = poweroff_command
 
-    async def get_root(self, request: web.Request):
+    async def get_root(self, request: web.Request) -> web.Response:
         return web.Response(text="This is shrpid!\n")
 
-    async def get_version(self, request: web.Request):
+    async def get_version(self, request: web.Request) -> web.Response:
         """Get the hardware and firmware version numbers."""
         hw_version = self.shrpi_device.hardware_version()
         fw_version = self.shrpi_device.firmware_version()
@@ -36,7 +36,7 @@ class RouteHandlers:
 
         return web.json_response(response)
 
-    async def get_state(self, request: web.Request):
+    async def get_state(self, request: web.Request) -> web.Response:
         """Get the current state of the device."""
         state = self.shrpi_device.state()
         en5v_state = self.shrpi_device.en5v_state()
@@ -50,7 +50,7 @@ class RouteHandlers:
 
         return web.json_response(response)
 
-    async def post_shutdown(self, request: web.Request):
+    async def post_shutdown(self, request: web.Request) -> web.Response:
         """Receive a shutdown request from the client."""
         self.shrpi_device.request_shutdown()  # Inform the device about the shutdown
         # call the system shutdown command
@@ -59,7 +59,7 @@ class RouteHandlers:
 
         return web.Response(status=204)
 
-    async def post_sleep(self, request: web.Request):
+    async def post_sleep(self, request: web.Request) -> web.Response:
         """Receive a sleep request from the client."""
 
         if self.shrpi_device.firmware_version().startswith("1."):
@@ -106,7 +106,7 @@ class RouteHandlers:
 
         return web.Response(status=204)
 
-    async def get_config(self, request: web.Request):
+    async def get_config(self, request: web.Request) -> web.Response:
         """Get the configuration."""
         watchdog_timeout = self.shrpi_device.watchdog_timeout()
         power_on_threshold = self.shrpi_device.power_on_threshold()
@@ -122,7 +122,7 @@ class RouteHandlers:
 
         return web.json_response(config)
 
-    async def get_config_key(self, request: web.Request):
+    async def get_config_key(self, request: web.Request) -> web.Response:
         """Get a configuration value."""
         key = request.match_info["key"]
 
@@ -139,18 +139,18 @@ class RouteHandlers:
 
         return web.json_response(value)
 
-    async def put_config_key(self, request: web.Request):
+    async def put_config_key(self, request: web.Request) -> web.Response:
         """Set a configuration value."""
         key = request.match_info["key"]
 
-        data = await request.json()
+        data: float = await request.json()
 
         # check that data is a number
         if not isinstance(data, numbers.Number):
             return web.Response(status=400, text="Value must be a number")
 
         if key == "watchdog_timeout":
-            self.shrpi_device.set_watchdog_timeout(data)
+            self.shrpi_device.set_watchdog_timeout(float(data))
         elif key == "power_on_threshold":
             self.shrpi_device.set_power_on_threshold(data)
         elif key == "power_off_threshold":
@@ -167,7 +167,7 @@ class RouteHandlers:
 
         return web.Response(status=204)
 
-    async def get_values(self, request: web.Request):
+    async def get_values(self, request: web.Request) -> web.Response:
         """Get measured values."""
         dcin_voltage = self.shrpi_device.dcin_voltage()
         supercap_voltage = self.shrpi_device.supercap_voltage()
@@ -183,7 +183,7 @@ class RouteHandlers:
 
         return web.json_response(values)
 
-    async def get_values_key(self, request: web.Request):
+    async def get_values_key(self, request: web.Request) -> web.Response:
         """Get a measured value."""
         key = request.match_info["key"]
 
@@ -206,7 +206,7 @@ async def run_http_server(
     socket_path: pathlib.PosixPath,
     socket_group: int,
     poweroff: str,
-):
+) -> web.AppRunner:
     """Run the HTTP server."""
 
     handlers = RouteHandlers(shrpi_device, poweroff_command=poweroff)
@@ -234,6 +234,6 @@ async def run_http_server(
     # set group ownership of the socket
     os.chown(str(socket_path), -1, socket_group)
     # set permissions of the socket
-    os.chmod(str(socket_path), 0o660)
+    os.chmod(str(socket_path), 0o660)  # nosec
 
     return runner

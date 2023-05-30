@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 import argparse
 import asyncio
 import grp
@@ -17,18 +19,20 @@ from shrpi.const import (
     I2C_BUS,
     VERSION,
 )
-from shrpi.i2c import SHRPiDevice, DeviceNotFoundError
+from shrpi.i2c import DeviceNotFoundError, SHRPiDevice
 from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
 
 
-def read_config_files(parser: argparse.ArgumentParser, paths: list[str]):
+def read_config_files(
+    parser: argparse.ArgumentParser, paths: List[str]
+) -> Dict[str, Any]:
     """Read the config file."""
 
     for path in paths:
         try:
-            with open(path, "r") as f:
-                config = yaml.safe_load(f)
+            with open(path) as f:
+                config: Dict[str, Any] = yaml.safe_load(f)
                 parser.set_defaults(**config)
         except FileNotFoundError:
             logger.error(f"Config file not found: {path}")
@@ -117,7 +121,6 @@ async def async_main():
         f"SH-RPi device detected; HW version {hw_version}, FW version {fw_version}"
     )
 
-
     blackout_time_limit = args.blackout_time_limit
     blackout_voltage_limit = args.blackout_voltage_limit
 
@@ -129,7 +132,7 @@ async def async_main():
         else:
             socket_path = pathlib.PosixPath.home() / ".shrpid.sock"
     else:
-        socket_path: pathlib.PosixPath = args.socket
+        socket_path = args.socket
 
     if socket_path.exists():
         # see if it's a socket
