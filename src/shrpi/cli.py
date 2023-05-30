@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Any, Dict, Tuple
 
 import asyncio
 import pathlib
@@ -17,28 +17,32 @@ app = typer.Typer(
     add_completion=False,
 )
 console = Console()
-state = {}
+
+# dictionary of state variables
+state: Dict[str, Any] = {}
 
 
-async def get_json(session: aiohttp.ClientSession, url: str) -> dict:
+async def get_json(session: aiohttp.ClientSession, url: str) -> Any:
     """Get JSON data from the given URL."""
     async with session.get(url) as resp:
         return await resp.json()
 
 
-async def post_json(session: aiohttp.ClientSession, url: str, data: dict) -> int:
+async def post_json(
+    session: aiohttp.ClientSession, url: str, data: Dict[Any, Any]
+) -> int:
     """Post JSON data to the given URL."""
     async with session.post(url, json=data) as resp:
         return resp.status
 
 
-async def put_json(session: aiohttp.ClientSession, url: str, data: dict) -> int:
+async def put_json(session: aiohttp.ClientSession, url: str, data: Any) -> int:
     """Put JSON data to the given URL."""
     async with session.put(url, json=data) as resp:
         return resp.status
 
 
-async def async_print_all(socket_path: pathlib.Path):
+async def async_print_all(socket_path: pathlib.Path) -> None:
     """Print all data from the device."""
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -73,7 +77,9 @@ async def async_print_all(socket_path: pathlib.Path):
             "Power-off threshold", f'{config["power_off_threshold"]:.1f}', "V"
         )
         if config["led_brightness"] is not None:
-            table.add_row("LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%")
+            table.add_row(
+                "LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%"
+            )
         table.add_section()
 
         table.add_row("Voltage in", f'{values["V_in"]:.1f}', "V")
@@ -87,12 +93,12 @@ async def async_print_all(socket_path: pathlib.Path):
 
 
 @app.command("print")
-def print_all():
+def print_all() -> None:
     """Print all data from the device."""
     asyncio.run(async_print_all(state["socket"]))
 
 
-async def async_shutdown(socket_path: pathlib.Path):
+async def async_shutdown(socket_path: pathlib.Path) -> None:
     """Tell the device to wait for shutdown."""
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -102,12 +108,12 @@ async def async_shutdown(socket_path: pathlib.Path):
 
 
 @app.command("shutdown")
-def shutdown():
+def shutdown() -> None:
     """Tell the device to shutdown."""
     asyncio.run(async_shutdown(state["socket"]))
 
 
-async def async_sleep(socket_path: pathlib.Path, time: dict):
+async def async_sleep(socket_path: pathlib.Path, time: Dict[str, str]) -> None:
     """Tell the device to sleep."""
 
     connector = aiohttp.UnixConnector(path=str(socket_path))
@@ -122,7 +128,7 @@ def sleep(
     time: str = typer.Argument(
         ..., help="Wakeup time, either as an absolute time, or a delay in seconds."
     ),
-):
+) -> None:
     """Tell the device to sleep."""
 
     time_dict = {}
@@ -140,7 +146,7 @@ def sleep(
 set_app = typer.Typer(help="Set configuration values.")
 
 
-async def async_set_watchdog(socket_path: pathlib.Path, timeout: float):
+async def async_set_watchdog(socket_path: pathlib.Path, timeout: float) -> None:
     """Set watchdog timeout in seconds. Value 0 disables the watchdog."""
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -152,14 +158,16 @@ async def async_set_watchdog(socket_path: pathlib.Path, timeout: float):
 
 
 @set_app.command("watchdog")
-def set_watchdog(timeout: float):
+def set_watchdog(timeout: float) -> None:
     """
     Set watchdog timeout in seconds. Value 0 disables the watchdog.
     """
     asyncio.run(async_set_watchdog(state["socket"], timeout))
 
 
-async def async_set_power_on_threshold(socket_path: pathlib.Path, threshold: float):
+async def async_set_power_on_threshold(
+    socket_path: pathlib.Path, threshold: float
+) -> None:
     """Set power-on threshold in volts."""
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -171,14 +179,16 @@ async def async_set_power_on_threshold(socket_path: pathlib.Path, threshold: flo
 
 
 @set_app.command("power-on-threshold")
-def set_power_on_threshold(threshold: float):
+def set_power_on_threshold(threshold: float) -> None:
     """
     Set power-on threshold in volts.
     """
     asyncio.run(async_set_power_on_threshold(state["socket"], threshold))
 
 
-async def async_set_power_off_threshold(socket_path: pathlib.Path, threshold: float):
+async def async_set_power_off_threshold(
+    socket_path: pathlib.Path, threshold: float
+) -> None:
     """Set power-off threshold in volts."""
     connector = aiohttp.UnixConnector(path=str(socket_path))
     async with aiohttp.ClientSession(connector=connector) as session:
@@ -190,14 +200,16 @@ async def async_set_power_off_threshold(socket_path: pathlib.Path, threshold: fl
 
 
 @set_app.command("power-off-threshold")
-def set_power_off_threshold(threshold: float):
+def set_power_off_threshold(threshold: float) -> None:
     """
     Set power-off threshold in volts.
     """
     asyncio.run(async_set_power_off_threshold(state["socket"], threshold))
 
 
-async def async_set_led_brightness(socket_path: pathlib.Path, brightness: float):
+async def async_set_led_brightness(
+    socket_path: pathlib.Path, brightness: float
+) -> None:
     """Set LED brightness in percent."""
     brightness_byte = int(brightness * 255 / 100)
     connector = aiohttp.UnixConnector(path=str(socket_path))
@@ -210,7 +222,7 @@ async def async_set_led_brightness(socket_path: pathlib.Path, brightness: float)
 
 
 @set_app.command("led")
-def set_led_brightness(brightness: float):
+def set_led_brightness(brightness: float) -> None:
     """
     Set LED brightness in percent.
     """
@@ -222,7 +234,7 @@ def callback(
     socket: pathlib.Path = typer.Option(
         pathlib.Path("/var/run/shrpid.sock"), "--socket", "-s"
     )
-):
+) -> None:
     """SH-RPi command line interface communicates with the shrpid daemon and
     allows the user to observe and control the device."""
     state["socket"] = socket

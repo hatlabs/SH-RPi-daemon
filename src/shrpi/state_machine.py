@@ -11,9 +11,9 @@ async def run_state_machine(
     shrpi_device: SHRPiDevice,
     blackout_time_limit: float,
     blackout_voltage_limit: float,
-    dry_run=False,
-    poweroff="/sbin/poweroff",
-):
+    dry_run: bool = False,
+    poweroff: str = "/sbin/poweroff",
+) -> None:
     state = "START"
     blackout_time = 0.0
 
