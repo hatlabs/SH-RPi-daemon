@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "shrpid"
-version = "2.2.1"
+version = "2.2.2"
 description = "shrpid is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the 'smart' aspects of the operation."
 readme = "README.md"
 authors = ["Matti Airas <matti.airas@hatlabs.fi>"]
