@@ -19,17 +19,17 @@ fi
 
 # Allow customization of the repository URL and branch
 
-REPOURL="${1-}"
-BRANCH="${2-}"
-
-shift
-shift
-
-if [ -z "$REPOURL" ] ; then
+if [ $# -gt 0 ] ; then
+    REPOURL="$1"
+    shift
+else
     REPOURL="https://github.com/hatlabs/SH-RPi-daemon"
 fi
 
-if [ -z "$BRANCH" ] ; then
+if [ $# -gt 0 ] ; then
+    BRANCH="$1"
+    shift
+else
     BRANCH="main"
 fi
 
