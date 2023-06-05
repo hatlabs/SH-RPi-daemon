@@ -471,17 +471,13 @@ if [ $INTERACTIVE -eq 0 ] || [ ! -z "$ENABLE_MODULES" ] || [ ! -z "$DISABLE_MODU
   parse_enable_disable_args
 else
   # If interactive mode is enabled, we need to ask the user
+
+  # Make sure "dialog" is installed
+  if ! command -v dialog &>/dev/null; then
+    apt-get -y install dialog
+  fi
+
   do_dialogs
-fi
-
-# Use Dialog to ask for the user's preferences:
-# - Should we enable the PCF8563 real-time clock?
-# - Should we enable the MCP2515 CAN controller?
-# - Should we enable the SC16IS752 overlay?
-
-# Make sure "dialog" is installed
-if ! command -v dialog &>/dev/null; then
-  apt-get -y install dialog
 fi
 
 # I2C is needed for SH-RPi - enable unconditionally
