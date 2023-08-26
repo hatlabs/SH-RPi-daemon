@@ -6,7 +6,8 @@ import numbers
 import os
 import pathlib
 
-import arrow
+import datetime
+import dateparser
 from aiohttp import web
 from loguru import logger
 
@@ -68,21 +69,20 @@ class RouteHandlers:
                 text="Sleep mode is not supported in firmware version 1.x",
             )
 
-        now = arrow.utcnow()
+        now = datetime.datetime.now()
 
         timestamp = 0
 
         data = await request.json()
         if "datetime" in data:
-            try:
-                datetime = arrow.get(data["datetime"])
-            except arrow.parser.ParserError:
+            dt = dateparser.parse(data["datetime"])
+            if dt is None:
                 return web.Response(status=400, text="Invalid datetime format")
 
-            if datetime < now:
+            if dt < now:
                 return web.Response(status=400, text="datetime must be in the future")
 
-            timestamp = int(datetime.timestamp())
+            timestamp = int(dt.timestamp())
         elif "delay" in data:
             try:
                 delay = int(data["delay"])
@@ -94,6 +94,8 @@ class RouteHandlers:
 
             timestamp = int(now.timestamp()) + delay
 
+        dt_str = datetime.datetime.fromtimestamp(timestamp).isoformat()
+
         # Use rtcwake to set the RTC alarm to wake up the system
         asyncio.create_task(
             asyncio.create_subprocess_exec("rtcwake", "-m", "no", "-t", str(timestamp))
@@ -104,7 +106,7 @@ class RouteHandlers:
         # From the OS point of view, this is a regular shutdown.
         asyncio.create_task(asyncio.create_subprocess_exec("shutdown", "-h", "now"))
 
-        return web.Response(status=204)
+        return web.Response(status=204, text=f"Set wakeup time to {dt_str}")
 
     async def get_config(self, request: web.Request) -> web.Response:
         """Get the configuration."""
