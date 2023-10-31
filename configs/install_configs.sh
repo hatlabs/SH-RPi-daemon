@@ -32,10 +32,17 @@ EOF
 
 _DEBUG=0
 
-CONFIG=/boot/config.txt
+if [ -e /boot/firmware/config.txt ] ; then
+  FIRMWARE=/firmware
+else
+  FIRMWARE=
+fi
+CONFIG=/boot${FIRMWARE}/config.txt
+
 OVERLAY_DIR=/boot/overlays
 SCRIPT_HWCLOCK_SET=/lib/udev/hwclock-set
 CAN_INTERFACE_FILE=/etc/network/interfaces.d/can0
+BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
 if [ $_DEBUG -ne 0 ]; then
   CONFIG=debug/config.txt
   OVERLAY_DIR=debug/overlays
@@ -95,9 +102,13 @@ do_i2c() {
   fi
 
   set_config_var dtparam=i2c_arm $SETTING $CONFIG &&
-    sed /etc/modules -i -e "s/^#[[:space:]]*\(i2c[-_]dev\)/\1/"
+  if ! [ -e $BLACKLIST ]; then
+    touch $BLACKLIST
+  fi
+  sed $BLACKLIST -i -e "s/^\(blacklist[[:space:]]*i2c[-_]bcm2708\)/#\1/"
+  sed /etc/modules -i -e "s/^#[[:space:]]*\(i2c[-_]dev\)/\1/"
   if ! grep -q "^i2c[-_]dev" /etc/modules; then
-    printf "i2c-dev\n" >>/etc/modules
+    printf "i2c-dev\n" >> /etc/modules
   fi
   # Enable I2C right away to avoid rebooting
   dtparam i2c_arm=$SETTING
