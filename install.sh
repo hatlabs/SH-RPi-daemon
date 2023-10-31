@@ -22,11 +22,25 @@ popd
 
 # install the daemon build dependencies
 
-apt install -y python3-pip
+apt install -y python3-pip python3-venv
+
+
+# If an existing venv is present, remove it
+if [ -d /usr/local/lib/shrpid ]; then
+    rm -rf /usr/local/lib/shrpid
+fi
+
+# Create a venv for the daemon
+python -m venv /usr/local/lib/shrpid
+source /usr/local/lib/shrpid/bin/activate
 
 # install the daemon itself
 
 pip3 install .
+
+# Create symlinks to the daemon and the CLI utility
+ln -sf /usr/local/lib/shrpid/bin/shrpid /usr/local/bin/shrpid
+ln -sf /usr/local/lib/shrpid/bin/shrpi /usr/local/bin/shrpi
 
 # copy the service definition file in place
 
