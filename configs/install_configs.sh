@@ -113,6 +113,8 @@ do_i2c() {
   # Enable I2C right away to avoid rebooting
   dtparam i2c_arm=$SETTING
   modprobe i2c-dev
+  # Wait a bit to make sure the device is created
+  sleep 1
   if ! command -v i2cdetect &>/dev/null; then
     apt-get -y install i2c-tools
   fi
