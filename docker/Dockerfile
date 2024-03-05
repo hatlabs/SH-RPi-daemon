@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.12-slim-bookworm
 
 ENV LANG=C.UTF-8 \
   LC_ALL=C.UTF-8 \
@@ -6,8 +6,8 @@ ENV LANG=C.UTF-8 \
 
 WORKDIR /app/
 
-RUN apt-get update && \
-  apt-get install -y --no-install-recommends \
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends \
   curl \
   && rm -rf /var/lib/apt/lists/*
 
@@ -15,7 +15,7 @@ COPY pyproject.toml poetry.lock README.md ./
 COPY src/ ./src/
 
 # Install Poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | POETRY_HOME=/opt/poetry python && \
+RUN curl -sSL https://install.python-poetry.org | POETRY_HOME=/opt/poetry python && \
     cd /usr/local/bin && \
     ln -s /opt/poetry/bin/poetry && \
     poetry config virtualenvs.create false
