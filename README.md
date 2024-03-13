@@ -40,6 +40,16 @@ Copy and paste the following lines to your terminal to install the latest versio
         https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/main/install-online.sh \
         | sudo bash
 
+### Installing from an online branch
+
+If you want to install the daemon from a specific branch, you can use the following command:
+
+    curl -L \
+        https://raw.githubusercontent.com/hatlabs/SH-RPi-daemon/BRANCH/install-online.sh \
+        | sudo bash -s -- https://github.com/hatlabs/SH-RPi-daemon BRANCH
+
+Replace `BRANCH` with the desired branch name. Note that the BRANCH needs to be specified twice in the command.
+
 ### Using Docker
 
 If you prefer to use Docker to run the daemon, you can clone the repo and issue the following commands:
@@ -90,6 +100,8 @@ Sh-RPi devices are available for purchase at [shop.hatlabs.fi](https://shop.hatl
 ----
 
 ## 🛠️ Development Instructions
+
+See the `run` script for common development tasks. The instructions below are for a generic `poetry` project.
 
 ### Building and releasing your package
 
