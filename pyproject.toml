@@ -5,7 +5,7 @@ requires = ["poetry_core>=1.0.0"]
 
 [tool.poetry]
 authors = ["Matti Airas <matti.airas@hatlabs.fi>"]
-description = "shrpid is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the 'smart' aspects of the operation."
+description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
 homepage = "https://github.com/hatlabs/SH-RPi-daemon"
 license = "BSD-3"
 name = "shrpid"
@@ -19,10 +19,10 @@ keywords = [] #! Update me
 # Pypi classifiers: https://pypi.org/classifiers/
 classifiers = [
   #! Update me
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
-  "Operating System :: OS Independent",
-  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: System Administrators",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: System :: Monitoring",
   "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.8",
