@@ -3,8 +3,6 @@ from enum import Enum
 
 from smbus2 import SMBus
 
-import shrpi.const
-
 
 class States(Enum):
     BEGIN = 0

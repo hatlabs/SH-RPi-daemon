@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+#
+# usage: ./run.sh command [argument ...]
+#
+# Commands used during development / CI.
+# Also, executable documentation for project dev practices.
+#
+# See https://death.andgravity.com/run-sh
+# for an explanation of how it works and why it's useful.
+
+# First, set up the environment.
+# (Check the notes at the end when changing this.)
+
+set -o nounset
+set -o pipefail
+set -o errexit
+
+# Enable this to echo commands as they are executed.
+#set -o xtrace
+
+# Change the current directory to the project root.
+PROJECT_ROOT=${0%/*}
+if [[ $0 != $PROJECT_ROOT && $PROJECT_ROOT != "" ]]; then
+  cd "$PROJECT_ROOT"
+fi
+readonly PROJECT_ROOT=$(pwd)
+
+# Some useful variables.
+DOCKER_IMAGE="shrpid"
+DOCKER_IMAGE_VERSION="latest"
+
+# Store the absolute path to this script (useful for recursion).
+readonly SCRIPT="$PROJECT_ROOT/$(basename "$0")"
+
+################################################################################
+# Meta-commands and utilities follow.
+
+function help {
+  # list all "public" functions (those not beginning with an underscore)
+  # defined in this file
+  printf "%s <task> [args]\n\nTasks:\n" "${0}"
+  compgen -A function | grep -v "^_" | cat -n
+
+  printf "\nExtended help:\n  Each task has comments for general usage\n"
+}
+
+once_hash_array=()
+function _once {
+  # Run a command only once during the execution of this script, even if it's
+  # called multiple times.
+  #
+  # Usage:
+  #   _once <command> [argument ...]
+  #
+  # Example:
+  #   _once echo "Hello"
+  #   _once echo "Hello"  # won't be executed
+
+  local command="$*"
+  local hash=$(echo "$command" | shasum | cut -d' ' -f1)
+  if [[ ! " ${once_hash_array[@]} " =~ " ${hash} " ]]; then
+    once_hash_array+=("$hash")
+    eval "$command"
+  fi
+}
+
+compose_flags=""
+function _dc {
+  docker compose $compose_flags "$@"
+}
+
+function _env {
+  echo "🗝️ Setting environment from .env and .env.defaults"
+  # Go through the files and export all variables not already present in
+  # the environment. First file has precedence!
+  if [ -f .env ]; then
+    _export_unset .env
+  else
+    # Make sure a .env file exists, otherwise docker-compose will complain
+    cp .env.defaults .env
+  fi
+  _export_unset .env.defaults
+}
+
+function _export_unset {
+  local file="$1"
+
+  # Need to use a temp file to avoid a subshell
+  local tmpfile=$(mktemp)
+  grep -v '^#' $file > $tmpfile
+
+  while read -r line; do
+    if [[ ! "$line" =~ ^[[:space:]]*$ ]]; then
+      varname=$(echo "$line" | cut -d= -f1)
+      if [[ -z "${!varname:-}" ]]; then
+        eval $line
+        export $varname
+      fi
+    fi
+  done < $tmpfile
+  rm $tmpfile
+}
+
+function _test_export_unset {
+  _export_unset .env
+  env | sort
+}
+
+################################################################################
+# Project-specific commands follow.
+
+function poetry-download {
+  # Download the latest version of poetry.
+  curl -sSL https://install.python-poetry.org | python3 -
+}
+
+function poetry-remove {
+  # Remove poetry from the system.
+  curl -sSL https://install.python-poetry.org | python3 - --uninstall
+}
+
+function install {
+  # Install the project dependencies.
+  poetry lock -n && poetry export --without-hashes > requirements.txt
+  poetry install -n
+  poetry run mypy --install-types --non-interactive src
+}
+
+function update-dev-deps {
+  # Update the development dependencies to latest versions.
+  poetry add --group dev ruff@latest mypy@latest mypy-extensions@latest
+}
+
+function format {
+  # Run the code style checks with ruff
+  poetry run ruff check --fix src
+  poetry run ruff format src
+}
+
+function mypy {
+  # Run the type checks with mypy
+  poetry run mypy --config-file pyproject.toml src
+}
+
+function lint {
+  poetry run ruff check src
+  poetry run ruff format --check src
+  mypy  # Call mypy function
+}
+
+function docker-build {
+  # Build the Docker image.
+  echo Building docker $(DOCKER_IMAGE):$(DOCKER_VERSION) ...
+  docker build -t ${DOCKER_IMAGE}:${DOCKER_VERSION} . \
+		-f ./docker/Dockerfile --no-cache
+}
+
+function docker-remove {
+  # Remove the Docker image.
+  echo Removing docker $(DOCKER_IMAGE):$(DOCKER_VERSION) ...
+  docker rmi -f ${DOCKER_IMAGE}:${DOCKER_VERSION}
+}
+
+function pycache-remove {
+  # Remove all __pycache__ directories.
+  find . -type d -name __pycache__ -exec rm -r {} +
+}
+
+function dsstore-remove {
+  # Remove all .DS_Store files.
+  find . -type f -name .DS_Store -exec rm {} +
+}
+
+function mypycache-remove {
+  # Remove all mypy cache directories.
+  find . -type d -name .mypy_cache -exec rm -r {} +
+}
+
+function ipynbcheckpoints-remove {
+  # Remove all .ipynb_checkpoints directories.
+  find . -type d -name .ipynb_checkpoints -exec rm -r {} +
+}
+
+function pytestcache-remove {
+  # Remove all pytest cache directories.
+  find . -type d -name .pytest_cache -exec rm -r {} +
+}
+
+function build-remove {
+  # Remove the build directory.
+  rm -rf build/
+}
+
+function clean {
+  # Remove all temporary files and directories.
+  pycache-remove
+  dsstore-remove
+  mypycache-remove
+  ipynbcheckpoints-remove
+  pytestcache-remove
+  build-remove
+}
+
+
+################################################################################
+# Commands end.
+
+# Dispatch to command. A simpler version would be just "$@" (with the quotes!).
+
+TIMEFORMAT=$'\nTask completed in %3lR'
+time "${@:-help}"
+
+# Some dev notes for this script.
+#
+# The commands *require*:
+#
+# * The current working directory is the project root.
+# * The shell options and globals are set as they are.
+#
+# Inspired by the following:
+#  - https://death.andgravity.com/run-sh
+#  - http://www.oilshell.org/blog/2020/02/good-parts-sketch.html
+#  - https://www.youtube.com/watch?v=SdmYd5hJISM&t=7s

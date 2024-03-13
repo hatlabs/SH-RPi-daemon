@@ -1,0 +1,44 @@
+name: Release to PyPI
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+
+      - name: Install poetry
+        run: ./run poetry-download
+
+
+      - name: Set up cache
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+
+      - name: Install dependencies
+        run: |
+          poetry config virtualenvs.in-project true
+          ./run install
+
+      - name: Build wheel
+        run: poetry build
+
+      - name: Publish
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/

@@ -1,108 +1,75 @@
 # Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
 [build-system]
-requires = ["poetry_core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry_core>=1.0.0"]
 
 [tool.poetry]
-name = "shrpid"
-version = "2.2.3"
-description = "shrpid is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the 'smart' aspects of the operation."
-readme = "README.md"
 authors = ["Matti Airas <matti.airas@hatlabs.fi>"]
-license = "BSD-3"
-repository = "https://github.com/hatlabs/SH-RPi-daemon"
+description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
 homepage = "https://github.com/hatlabs/SH-RPi-daemon"
+license = "BSD-3"
+name = "shrpid"
+readme = "README.md"
+repository = "https://github.com/hatlabs/SH-RPi-daemon"
+version = "2.2.4-dev1"
 
 # Keywords description https://python-poetry.org/docs/pyproject/#keywords
-keywords = []  #! Update me
+keywords = [] #! Update me
 
 # Pypi classifiers: https://pypi.org/classifiers/
-classifiers = [  #! Update me
-  "Development Status :: 3 - Alpha",
-  "Intended Audience :: Developers",
-  "Operating System :: OS Independent",
-  "Topic :: Software Development :: Libraries :: Python Modules",
+classifiers = [
+  #! Update me
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: System Administrators",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: System :: Monitoring",
   "License :: OSI Approved :: BSD License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.8",
 ]
 
 packages = [
-  { include = "shrpi", from = "src" },
+  {include = "shrpi", from = "src"},
 ]
 
 [tool.poetry.scripts]
-shrpid = "shrpi.__main__:daemon"
 shrpi = "shrpi.__main__:cli"
+shrpid = "shrpi.__main__:daemon"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-smbus2 = "^0.4.2"
-loguru = "^0.6.0"
 aiohttp = "^3.8.3"
-rich = "^13.3.1"
-typer = "^0.7.0"
-pyyaml = "^6.0"
 dateparser = "^1.1.8"
+loguru = "^0.6.0"
+python = "^3.8"
+pyyaml = "^6.0"
+rich = "^13.3.1"
+smbus2 = "^0.4.2"
+typer = "^0.7.0"
 
-[tool.poetry.dev-dependencies]
-bandit = "^1.7.4"
-black = "^22.12.0"
-darglint = "^1.8.1"
-isort = "^5.11.3"
-mypy = "^0.991"
-mypy-extensions = "^0.4.3"
-pre-commit = "^2.20.0"
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.2"
+mypy = "^1.9.0"
+mypy-extensions = "^1.0.0"
+coverage = "^7.0.0"
+coverage-badge = "^1.1.0"
 pydocstyle = "^6.1.1"
 pylint = "^2.15.9"
 pytest = "^7.2.1"
-pyupgrade = "^3.3.1"
-safety = "^2.3.5"
-coverage = "^7.0.0"
-coverage-badge = "^1.1.0"
 pytest-cov = "^4.0.0"
+pyupgrade = "^3.3.1"
 
-[tool.black]
-# https://github.com/psf/black
-target-version = ["py38"]
+[tool.ruff]
 line-length = 88
-color = true
-
-exclude = '''
-/(
-    \.git
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-    | env
-    | venv
-)/
-'''
-
-[tool.isort]
-# https://github.com/timothycrosley/isort/
-py_version = 38
-line_length = 88
-
-known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
-sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-include_trailing_comma = true
-profile = "black"
-multi_line_output = 3
-indent = 4
-color_output = false
+# pyflakes, pycodestyle and isort
+lint.select = ["F", "E", "W", "I001"]
+target-version = "py38"
 
 [tool.mypy]
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
-python_version = 3.8
-pretty = true
-show_traceback = true
 color_output = true
+pretty = true
+python_version = 3.8
+show_traceback = true
 
 allow_redefinition = false
 check_untyped_defs = true
@@ -123,12 +90,11 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-
 [tool.pytest.ini_options]
 # https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
 # Directories that are not visited by pytest collector:
-norecursedirs =["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
+norecursedirs = ["hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
 
 # Extra options:
 addopts = [
