@@ -40,13 +40,11 @@ fi
 CONFIG=/boot${FIRMWARE}/config.txt
 
 OVERLAY_DIR=/boot/overlays
-SCRIPT_HWCLOCK_SET=/lib/udev/hwclock-set
 CAN_INTERFACE_FILE=/etc/network/interfaces.d/can0
 BLACKLIST=/etc/modprobe.d/raspi-blacklist.conf
 if [ $_DEBUG -ne 0 ]; then
   CONFIG=debug/config.txt
   OVERLAY_DIR=debug/overlays
-  SCRIPT_HWCLOCK_SET=debug/hwclock-set
   CAN_INTERFACE_FILE=debug/can0
 fi
 
@@ -182,19 +180,6 @@ function disable_config_line() {
       sed -i "s/^\($line\)/#\1/" "$file"
     fi
   fi
-}
-
-rtc_install() {
-  apt-get -y remove fake-hwclock
-  update-rc.d -f fake-hwclock remove
-  systemctl disable fake-hwclock
-  sed -i -e "s,^\(if \[ \-e /run/systemd/system \] ; then\),if false; then  #\1," $SCRIPT_HWCLOCK_SET
-}
-
-rtc_uninstall() {
-  apt-get -y install fake-hwclock
-  sed -i -e "s,^\(if false; then  #\),," $SCRIPT_HWCLOCK_SET
-  systemctl enable fake-hwclock
 }
 
 do_dialog_rtc() {
@@ -525,7 +510,6 @@ if [ $INSTALL_RTC -eq 1 ]; then
     if detect_i2c_device '(68)'; then
       echo "Installing DS3231 real-time clock device overlay"
       enable_config_line "dtoverlay=i2c-rtc,ds3231" $CONFIG
-      rtc_install
     else
       echo "DS3231 real-time clock device not detected. Skipping."
     fi
@@ -534,7 +518,6 @@ if [ $INSTALL_RTC -eq 1 ]; then
     if detect_i2c_device '(51)|(50: -- UU)'; then
       echo "Installing PCF8563 real-time clock device overlay"
       enable_config_line "dtoverlay=i2c-rtc,pcf8563" $CONFIG
-      rtc_install
     else
       echo "PCF8563 real-time clock device not detected or already installed. Skipping."
     fi
@@ -543,11 +526,9 @@ elif [ $UNINSTALL_RTC -eq 1 ]; then
   if [ $VERSION -eq 1 ]; then
     echo "Disabling DS3231 real-time clock device overlay"
     disable_config_line "dtoverlay=i2c-rtc,ds3231" $CONFIG
-    rtc_uninstall
   else
     echo "Disabling PCF8563 real-time clock device overlay"
     disable_config_line "dtoverlay=i2c-rtc,pcf8563" $CONFIG
-    rtc_uninstall
   fi
 fi
 
