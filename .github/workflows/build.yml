@@ -17,7 +17,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install poetry
-      run: make poetry-download
+      run: ./run poetry-download
 
     - name: Set up cache
       uses: actions/cache@v2.1.6
@@ -27,12 +27,8 @@ jobs:
     - name: Install dependencies
       run: |
         poetry config virtualenvs.in-project true
-        poetry install
+        ./run install
 
     - name: Run style checks
       run: |
-        make check-codestyle
-
-    - name: Run safety checks
-      run: |
-        make check-safety
+        ./run lint
