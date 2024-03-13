@@ -1,7 +1,6 @@
-from typing import Any, Dict, Tuple
-
 import asyncio
 import pathlib
+from typing import Any, Dict
 
 import aiohttp
 import typer
@@ -126,7 +125,8 @@ async def async_sleep(socket_path: pathlib.Path, time: Dict[str, str]) -> None:
 @app.command("sleep")
 def sleep(
     time: str = typer.Argument(
-        ..., help="Wakeup time, either as an absolute date and time, or a delay in seconds."
+        ...,
+        help="Wakeup time, either as an absolute date and time, or a delay in seconds.",
     ),
 ) -> None:
     """Tell the device to sleep."""
@@ -233,7 +233,7 @@ def set_led_brightness(brightness: float) -> None:
 def callback(
     socket: pathlib.Path = typer.Option(
         pathlib.Path("/var/run/shrpid.sock"), "--socket", "-s"
-    )
+    ),
 ) -> None:
     """SH-RPi command line interface communicates with the shrpid daemon and
     allows the user to observe and control the device."""

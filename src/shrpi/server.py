@@ -2,11 +2,11 @@
 # The server listens on a unix socket, and the client connects to it.
 
 import asyncio
+import datetime
 import numbers
 import os
 import pathlib
 
-import datetime
 import dateparser
 from aiohttp import web
 from loguru import logger

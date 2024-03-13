@@ -2,7 +2,6 @@
 It communicates with the SH-RPi device, providing the "smart"
 aspects of the operation."""
 
-import sys
 from importlib import metadata as importlib_metadata
 
 

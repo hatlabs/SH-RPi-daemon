@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 import argparse
 import asyncio
 import grp
@@ -7,6 +5,7 @@ import os
 import pathlib
 import signal
 import sys
+from typing import Any, Dict, List
 
 import yaml
 from loguru import logger
@@ -58,7 +57,10 @@ def parse_arguments():
         "--blackout-voltage-limit",
         type=float,
         default=DEFAULT_BLACKOUT_VOLTAGE_LIMIT,
-        help="The device will initiate shutdown if the input voltage drops below this value",
+        help=(
+            "The device will initiate shutdown if the input "
+            "voltage drops below this value"
+        ),
     )
     parser.add_argument(
         "--socket",
@@ -143,7 +145,8 @@ async def async_main():
             socket_path.stat().st_uid != 0
         ):  # it's a socket, but is it owned by anyone?
             logger.error(
-                f"{socket_path} exists and is owned by UID {socket_path.stat().st_uid}, exiting"
+                f"{socket_path} exists and is owned by UID "
+                f"{socket_path.stat().st_uid}, exiting"
             )
             sys.exit(1)
         else:
