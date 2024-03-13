@@ -11,7 +11,7 @@ license = "BSD-3"
 name = "shrpid"
 readme = "README.md"
 repository = "https://github.com/hatlabs/SH-RPi-daemon"
-version = "2.2.4-dev1"
+version = "2.2.4-dev2"
 
 # Keywords description https://python-poetry.org/docs/pyproject/#keywords
 keywords = [] #! Update me
