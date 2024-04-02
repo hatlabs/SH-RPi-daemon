@@ -26,7 +26,7 @@ Steps to reproduce the behavior:
 * Python version, get it with:
 
 ```bash
-python --version
+python3 --version
 ```
 
 ### Screenshots

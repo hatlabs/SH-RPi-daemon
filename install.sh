@@ -31,7 +31,7 @@ if [ -d /usr/local/lib/shrpid ]; then
 fi
 
 # Create a venv for the daemon
-python -m venv /usr/local/lib/shrpid
+python3 -m venv /usr/local/lib/shrpid
 source /usr/local/lib/shrpid/bin/activate
 
 # install the daemon itself
