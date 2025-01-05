@@ -21,7 +21,7 @@ is a Raspberry Pi smart power management board. The main features are:
 - Peak power management: The same supercapacitor circuitry is able to provide peak current for power-hungry devices such as the Raspberry Pi 4B with SSD or NVMe drives, allowing those devices to be powered using current-limited subcircuits such as the NMEA2000 bus power wires.
 - Protection circuitry: The board is protected against noisy 12V/24V voltages commonly present on vehicles or marine vessels.
 - A battery-powered real-time clock circuit, allowing for the device to keep time even in the absence of GPS or networking.
-  
+
 `shrpid` is a power monitor and watchdog for the SH-RPi. It communicates with the SH-RPi device, providing the "smart" aspects of the operation. Supported features include:
 
 - Blackout reporting if input voltage falls below a defined threshold
@@ -80,7 +80,12 @@ The above command will enable the RTC and CAN (NMEA 2000) features. The followin
 
 ## Configuration
 
-The `shrpid` daemon can be configured using a configuration file. The default configuration file is located at `/etc/shrpid.conf`. The configuration file is in YAML format. The configuration keys are the same as daemon command line arguments that can be seen by issuing the following command:
+The `shrpid` daemon can be configured using a configuration file.
+The default configuration file location is `/etc/shrpid.conf`.
+Note that no configuration file is created by default.
+Instead, you need to create one at the given location.
+The configuration file is in YAML format.
+The configuration keys are the same as daemon command line arguments that can be seen by issuing the following command:
 
     shrpid --help
 
