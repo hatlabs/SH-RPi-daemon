@@ -23,24 +23,25 @@ from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
 
 
-def read_config_files(
-    parser: argparse.ArgumentParser, paths: List[str]
-) -> Dict[str, Any]:
+def read_config_files(parser: argparse.ArgumentParser, paths: List[str]) -> None:
     """Read the config file."""
 
     for path in paths:
         try:
             with open(path) as f:
                 config: Dict[str, Any] = yaml.safe_load(f)
-                parser.set_defaults(**config)
+
+                # Replace dashes with underscores in config keys
+                config_: Dict[str, Any] = {}
+                for key, value in config.items():
+                    config_[key.replace("-", "_")] = value
+                parser.set_defaults(**config_)
         except FileNotFoundError:
             logger.error(f"Config file not found: {path}")
             sys.exit(1)
         except yaml.YAMLError as e:
             logger.error(f"Error parsing config file: {e!s}")
             sys.exit(1)
-
-    return config
 
 
 def parse_arguments():
@@ -96,6 +97,8 @@ def parse_arguments():
 
     # Reload arguments to override config file values with command line values
     args = parser.parse_args()
+
+    logger.debug("args: {}", args)
 
     return args
 
@@ -185,6 +188,7 @@ async def async_main():
         blackout_time_limit,
         blackout_voltage_limit,
         poweroff=args.poweroff,
+        dry_run=args.n,
     )
     coro2 = run_http_server(
         shrpi_device, socket_path, socket_group, poweroff=args.poweroff

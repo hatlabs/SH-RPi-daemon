@@ -109,9 +109,9 @@ function _test_export_unset {
 ################################################################################
 # Project-specific commands follow.
 
-function poetry-download {
-  # Download the latest version of poetry.
-  curl -sSL https://install.python-poetry.org | python3 -
+function uv-download {
+  # Download the latest version of uv.
+  curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
 function poetry-remove {
@@ -121,30 +121,29 @@ function poetry-remove {
 
 function install {
   # Install the project dependencies.
-  poetry lock -n && poetry export --without-hashes > requirements.txt
-  poetry install -n
-  poetry run mypy --install-types --non-interactive src
+  uv sync
+  uv lock
 }
 
 function update-dev-deps {
   # Update the development dependencies to latest versions.
-  poetry add --group dev ruff@latest mypy@latest mypy-extensions@latest
+  uv add --dev ruff mypy mypy-extensions
 }
 
 function format {
   # Run the code style checks with ruff
-  poetry run ruff check --fix src
-  poetry run ruff format src
+  uv run ruff check --fix src
+  uv run ruff format src
 }
 
 function mypy {
   # Run the type checks with mypy
-  poetry run mypy --config-file pyproject.toml src
+  uv run mypy --config-file pyproject.toml src
 }
 
 function lint {
-  poetry run ruff check src
-  poetry run ruff format --check src
+  uv run ruff check src
+  uv run ruff format --check src
   mypy  # Call mypy function
 }
 
