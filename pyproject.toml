@@ -1,5 +1,5 @@
 [project]
-name = "sh-rpi-daemon"
+name = "shrpid"
 version = "2.2.5"
 description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
 readme = "README.md"
