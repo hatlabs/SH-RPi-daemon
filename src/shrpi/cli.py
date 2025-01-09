@@ -70,23 +70,23 @@ async def async_print_all(socket_path: pathlib.Path) -> None:
         table.add_row("Watchdog enabled", str(state["watchdog_enabled"]), "")
         table.add_section()
 
-        table.add_row("Watchdog timeout", f'{config["watchdog_timeout"]:.1f}', "s")
-        table.add_row("Power-on threshold", f'{config["power_on_threshold"]:.1f}', "V")
+        table.add_row("Watchdog timeout", f"{config['watchdog_timeout']:.1f}", "s")
+        table.add_row("Power-on threshold", f"{config['power_on_threshold']:.1f}", "V")
         table.add_row(
-            "Power-off threshold", f'{config["power_off_threshold"]:.1f}', "V"
+            "Power-off threshold", f"{config['power_off_threshold']:.1f}", "V"
         )
         if config["led_brightness"] is not None:
             table.add_row(
-                "LED brightness", f'{100*config["led_brightness"]/255:.1f}', "%"
+                "LED brightness", f"{100 * config['led_brightness'] / 255:.1f}", "%"
             )
         table.add_section()
 
-        table.add_row("Voltage in", f'{values["V_in"]:.1f}', "V")
+        table.add_row("Voltage in", f"{values['V_in']:.1f}", "V")
         if values["I_in"] is not None:
-            table.add_row("Current in", f'{values["I_in"]:.2f}', "A")
-        table.add_row("Supercap voltage", f'{values["V_supercap"]:.2f}', "V")
+            table.add_row("Current in", f"{values['I_in']:.2f}", "A")
+        table.add_row("Supercap voltage", f"{values['V_supercap']:.2f}", "V")
         if values["T_mcu"] is not None:
-            table.add_row("MCU temperature", f'{values["T_mcu"]-273.15:.1f}', "°C")
+            table.add_row("MCU temperature", f"{values['T_mcu'] - 273.15:.1f}", "°C")
 
         console.print(table)
 
