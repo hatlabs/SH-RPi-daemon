@@ -22,12 +22,19 @@ popd
 
 # install the daemon build dependencies
 
-apt install -y python3-pip python3-venv
+apt install -y python3-pip python3-venv pipx
 
-
-# If an existing venv is present, remove it
+# If a legacy venv is present, remove it
 if [ -d /usr/local/lib/shrpid ]; then
     rm -rf /usr/local/lib/shrpid
+fi
+
+# If existing binaries are present, remove them
+if [ -f /usr/local/bin/shrpid ]; then
+    rm /usr/local/bin/shrpid
+fi
+if [ -f /usr/local/bin/shrpi ]; then
+    rm /usr/local/bin/shrpi
 fi
 
 # Create a venv for the daemon
@@ -36,11 +43,7 @@ source /usr/local/lib/shrpid/bin/activate
 
 # install the daemon itself
 
-pip3 install .
-
-# Create symlinks to the daemon and the CLI utility
-ln -sf /usr/local/lib/shrpid/bin/shrpid /usr/local/bin/shrpid
-ln -sf /usr/local/lib/shrpid/bin/shrpi /usr/local/bin/shrpi
+PIPX_BIN_DIR=/usr/local/bin PIPX_HOME=/opt/pipx pipx install --force .
 
 # copy the service definition file in place
 
