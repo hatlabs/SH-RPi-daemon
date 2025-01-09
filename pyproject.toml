@@ -1,62 +1,39 @@
-# Poetry pyproject.toml: https://python-poetry.org/docs/pyproject/
-[build-system]
-build-backend = "poetry.core.masonry.api"
-requires = ["poetry_core>=1.0.0"]
-
-[tool.poetry]
-authors = ["Matti Airas <matti.airas@hatlabs.fi>"]
-description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
-homepage = "https://github.com/hatlabs/SH-RPi-daemon"
-license = "BSD-3"
-name = "shrpid"
-readme = "README.md"
-repository = "https://github.com/hatlabs/SH-RPi-daemon"
+[project]
+name = "sh-rpi-daemon"
 version = "2.2.5"
-
-# Keywords description https://python-poetry.org/docs/pyproject/#keywords
-keywords = [] #! Update me
-
-# Pypi classifiers: https://pypi.org/classifiers/
-classifiers = [
-  #! Update me
-  "Development Status :: 5 - Production/Stable",
-  "Intended Audience :: System Administrators",
-  "Operating System :: POSIX :: Linux",
-  "Topic :: System :: Monitoring",
-  "License :: OSI Approved :: BSD License",
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.8",
+description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.8.3",
+    "dateparser>=1.1.8",
+    "loguru>=0.6.0",
+    "pyyaml>=6.0",
+    "rich>=13.3.1",
+    "smbus2>=0.4.2",
+    "typer>=0.7.0",
 ]
+authors = [{ name = "Matti Airas", email = "matti.airas@hatlabs.fi" }]
 
-packages = [
-  {include = "shrpi", from = "src"},
-]
-
-[tool.poetry.scripts]
+[project.scripts]
 shrpi = "shrpi.__main__:cli"
 shrpid = "shrpi.__main__:daemon"
 
-[tool.poetry.dependencies]
-aiohttp = "^3.8.3"
-dateparser = "^1.1.8"
-loguru = "^0.6.0"
-python = "^3.8"
-pyyaml = "^6.0"
-rich = "^13.3.1"
-smbus2 = "^0.4.2"
-typer = "^0.7.0"
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.3.2"
-mypy = "^1.9.0"
-mypy-extensions = "^1.0.0"
-coverage = "^7.0.0"
-coverage-badge = "^1.1.0"
-pydocstyle = "^6.1.1"
-pylint = "^2.15.9"
-pytest = "^7.2.1"
-pytest-cov = "^4.0.0"
-pyupgrade = "^3.3.1"
+[dependency-groups]
+dev = [
+    "coverage>=7.0.0",
+    "coverage-badge>=1.1.0",
+    "mypy>=1.9.0",
+    "mypy-extensions>=1.0.0",
+    "pydocstyle>=6.1.1",
+    "pylint>=2.15.9",
+    "pytest>=7.2.1",
+    "pytest-cov>=4.0.0",
+    "pyupgrade>=3.3.1",
+    "ruff>=0.3.2",
+    "types-dateparser>=1.2.0.20240420",
+    "types-pyyaml>=6.0.12.20241230",
+]
 
 [tool.ruff]
 line-length = 88
@@ -68,7 +45,7 @@ target-version = "py38"
 # https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 color_output = true
 pretty = true
-python_version = 3.8
+python_version = "3.8"
 show_traceback = true
 
 allow_redefinition = false
@@ -106,17 +83,3 @@ addopts = [
 
 [tool.coverage.run]
 source = ["tests"]
-
-[coverage.paths]
-source = "src/shrpi"
-
-[coverage.run]
-branch = true
-
-[coverage.report]
-fail_under = 50
-show_missing = true
-
-[tool.poetry_bumpversion.file."VERSION"]
-
-[tool.poetry_bumpversion.file."src/shrpi/const.py"]
