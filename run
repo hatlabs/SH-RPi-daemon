@@ -109,9 +109,9 @@ function _test_export_unset {
 ################################################################################
 # Project-specific commands follow.
 
-function poetry-download {
-  # Download the latest version of poetry.
-  curl -sSL https://install.python-poetry.org | python3 -
+function uv-download {
+  # Download the latest version of uv.
+  curl -LsSf https://astral.sh/uv/install.sh | sh
 }
 
 function poetry-remove {
