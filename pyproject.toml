@@ -3,7 +3,7 @@ name = "sh-rpi-daemon"
 version = "2.2.5"
 description = "shrpid is a power monitor and watchdog daemon for the SH-RPi."
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.8"
 dependencies = [
     "aiohttp>=3.8.3",
     "dateparser>=1.1.8",
