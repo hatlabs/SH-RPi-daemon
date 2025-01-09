@@ -20,23 +20,22 @@ jobs:
         with:
           python-version: '3.8'
 
-      - name: Install poetry
-        run: ./run poetry-download
+      - name: Install uv
+        run: ./run uv-download
 
 
       - name: Set up cache
         uses: actions/cache@v4
         with:
           path: .venv
-          key: venv-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('poetry.lock') }}
+          key: venv-${{ hashFiles('pyproject.toml') }}-${{ hashFiles('uv.lock') }}
 
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
           ./run install
 
       - name: Build wheel
-        run: poetry build
+        run: uv build
 
       - name: Publish
         uses: pypa/gh-action-pypi-publish@release/v1

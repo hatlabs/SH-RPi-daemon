@@ -122,6 +122,7 @@ function poetry-remove {
 function install {
   # Install the project dependencies.
   uv sync
+  uv lock
 }
 
 function update-dev-deps {
