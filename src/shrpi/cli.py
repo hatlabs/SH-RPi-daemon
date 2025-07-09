@@ -98,8 +98,8 @@ async def async_print_all(socket_path: pathlib.Path) -> None:
             table.append(("MCU temperature", f"{values['T_mcu'] - 273.15:.1f}", "°C"))
 
         keys, values, _ = zip(*table)
-        klen = max(*keys, key=len)
-        vlen = max(*values, key=len)
+        klen = len(max(keys, key=len))
+        vlen = len(max(values, key=len))
         for key, val, unit in table:
             print(f"{key:<{klen}}  {val:>{vlen}}  {unit}")
 
