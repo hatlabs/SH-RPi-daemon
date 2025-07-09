@@ -21,7 +21,9 @@ pushd configs
 popd
 
 # install uv, which manages venv for installing the daemon
-curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
+if ! [[ $(type -P "$cmd") ]]; then
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
+fi
 
 # If a legacy venv is present, remove it
 if [ -d /usr/local/lib/shrpid ]; then
@@ -37,11 +39,9 @@ if [ -f /usr/local/bin/shrpi ]; then
 fi
 
 # install the daemon itself
-
 UV_TOOL_BIN_DIR=/usr/local/bin UV_TOOL_DIR=/opt/uv uv tool install --force .
 
 # copy the service definition file in place
-
 install -o root shrpid.service /lib/systemd/system
 systemctl daemon-reload
 systemctl enable shrpid
