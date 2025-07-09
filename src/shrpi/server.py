@@ -7,7 +7,6 @@ import numbers
 import os
 import pathlib
 
-import dateparser
 from aiohttp import web
 from loguru import logger
 
@@ -75,6 +74,8 @@ class RouteHandlers:
 
         data = await request.json()
         if "datetime" in data:
+            import dateparser
+
             dt = dateparser.parse(data["datetime"])
             if dt is None:
                 return web.Response(status=400, text="Invalid datetime format")
