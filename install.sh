@@ -39,7 +39,7 @@ if [ -f /usr/local/bin/shrpi ]; then
 fi
 
 # install the daemon itself
-UV_TOOL_BIN_DIR=/usr/local/bin UV_TOOL_DIR=/opt/uv uv tool install --force .
+UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_TOOL_BIN_DIR=/usr/local/bin UV_TOOL_DIR=/opt/uv uv tool install --force .
 
 # copy the service definition file in place
 install -o root shrpid.service /lib/systemd/system
