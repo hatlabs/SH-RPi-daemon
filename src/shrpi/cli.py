@@ -34,7 +34,7 @@ class Ansi(Enum):
         return f"\x1b[3{self.value}m"
 
 
-def print_colored(*text: str, color: Ansi = Ansi.WHITE):
+def print_colored(*text: str, color: Ansi = Ansi.WHITE) -> None:
     print(color, *text, "\x1b[0m")
 
 
