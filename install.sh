@@ -20,9 +20,10 @@ pushd configs
 ./install_configs.sh "$@"
 popd
 
-# install the daemon build dependencies
-
-apt install -y python3-pip python3-venv pipx
+# install uv, which manages venv for installing the daemon
+if ! [[ $(type -P uv) ]]; then
+    curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
+fi
 
 # If a legacy venv is present, remove it
 if [ -d /usr/local/lib/shrpid ]; then
@@ -37,16 +38,10 @@ if [ -f /usr/local/bin/shrpi ]; then
     rm /usr/local/bin/shrpi
 fi
 
-# Create a venv for the daemon
-python3 -m venv /usr/local/lib/shrpid
-source /usr/local/lib/shrpid/bin/activate
-
 # install the daemon itself
-
-PIPX_BIN_DIR=/usr/local/bin PIPX_HOME=/opt/pipx pipx install --force .
+UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy UV_TOOL_BIN_DIR=/usr/local/bin UV_TOOL_DIR=/opt/uv uv tool install --force .
 
 # copy the service definition file in place
-
 install -o root shrpid.service /lib/systemd/system
 systemctl daemon-reload
 systemctl enable shrpid
