@@ -21,7 +21,7 @@ pushd configs
 popd
 
 # install uv, which manages venv for installing the daemon
-if ! [[ $(type -P "$cmd") ]]; then
+if ! [[ $(type -P uv) ]]; then
     curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR="/usr/local/bin" sh
 fi
 
