@@ -19,7 +19,6 @@ from shrpi.const import (
     VERSION,
 )
 from shrpi.i2c import DeviceNotFoundError, SHRPiDevice
-from shrpi.server import run_http_server
 from shrpi.state_machine import run_state_machine
 
 
@@ -190,6 +189,8 @@ async def async_main():
         poweroff=args.poweroff,
         dry_run=args.n,
     )
+    from shrpi.server import run_http_server
+
     coro2 = run_http_server(
         shrpi_device, socket_path, socket_group, poweroff=args.poweroff
     )

@@ -1,11 +1,10 @@
 import asyncio
 import pathlib
+from enum import Enum
 from typing import Any, Dict
 
-import aiohttp
 import typer
-from rich.console import Console
-from rich.table import Table
+from aiohttp import ClientSession, UnixConnector
 
 """SH-RPi command line interface communicates with the shrpid daemon and
 allows the user to observe and control the device."""
@@ -15,27 +14,43 @@ app = typer.Typer(
     help=__doc__,
     add_completion=False,
 )
-console = Console()
 
 # dictionary of state variables
 state: Dict[str, Any] = {}
 
 
-async def get_json(session: aiohttp.ClientSession, url: str) -> Any:
+class Ansi(Enum):
+    BLACK = 0
+    RED = 1
+    GREEN = 2
+    YELLOW = 3
+    BLUE = 4
+    MAGENTA = 5
+    CYAN = 6
+    WHITE = 7
+    DEFAULT = 9
+
+    def __str__(self) -> str:
+        return f"\x1b[3{self.value}m"
+
+
+def print_colored(*text: str, color: Ansi = Ansi.WHITE) -> None:
+    print(color, *text, "\x1b[0m")
+
+
+async def get_json(session: ClientSession, url: str) -> Any:
     """Get JSON data from the given URL."""
     async with session.get(url) as resp:
         return await resp.json()
 
 
-async def post_json(
-    session: aiohttp.ClientSession, url: str, data: Dict[Any, Any]
-) -> int:
+async def post_json(session: ClientSession, url: str, data: Dict[Any, Any]) -> int:
     """Post JSON data to the given URL."""
     async with session.post(url, json=data) as resp:
         return resp.status
 
 
-async def put_json(session: aiohttp.ClientSession, url: str, data: Any) -> int:
+async def put_json(session: ClientSession, url: str, data: Any) -> int:
     """Put JSON data to the given URL."""
     async with session.put(url, json=data) as resp:
         return resp.status
@@ -43,8 +58,8 @@ async def put_json(session: aiohttp.ClientSession, url: str, data: Any) -> int:
 
 async def async_print_all(socket_path: pathlib.Path) -> None:
     """Print all data from the device."""
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         coro1 = get_json(session, "http://localhost:8080/version")
         coro2 = get_json(session, "http://localhost:8080/state")
         coro3 = get_json(session, "http://localhost:8080/config")
@@ -55,40 +70,38 @@ async def async_print_all(socket_path: pathlib.Path) -> None:
 
         # Print all gathered data in a neat table
 
-        table = Table(show_header=False, box=None)
-        table.add_column("Key", style="bold")
-        table.add_column("Value", justify="right")
-        table.add_column("Unit")
+        table = []
 
-        table.add_row("Hardware version", str(version["hardware_version"]), "")
-        table.add_row("Firmware version", str(version["firmware_version"]), "")
-        table.add_row("Daemon version", str(version["daemon_version"]), "")
-        table.add_section()
+        table.append(("Hardware version", str(version["hardware_version"]), ""))
+        table.append(("Firmware version", str(version["firmware_version"]), ""))
+        table.append(("Daemon version", str(version["daemon_version"]), ""))
 
-        table.add_row("State", str(state["state"]), "")
-        table.add_row("5V output", str(state["5v_output_enabled"]), "")
-        table.add_row("Watchdog enabled", str(state["watchdog_enabled"]), "")
-        table.add_section()
+        table.append(("State", str(state["state"]), ""))
+        table.append(("5V output", str(state["5v_output_enabled"]), ""))
+        table.append(("Watchdog enabled", str(state["watchdog_enabled"]), ""))
 
-        table.add_row("Watchdog timeout", f"{config['watchdog_timeout']:.1f}", "s")
-        table.add_row("Power-on threshold", f"{config['power_on_threshold']:.1f}", "V")
-        table.add_row(
-            "Power-off threshold", f"{config['power_off_threshold']:.1f}", "V"
+        table.append(("Watchdog timeout", f"{config['watchdog_timeout']:.1f}", "s"))
+        table.append(("Power-on threshold", f"{config['power_on_threshold']:.1f}", "V"))
+        table.append(
+            ("Power-off threshold", f"{config['power_off_threshold']:.1f}", "V")
         )
         if config["led_brightness"] is not None:
-            table.add_row(
-                "LED brightness", f"{100 * config['led_brightness'] / 255:.1f}", "%"
+            table.append(
+                ("LED brightness", f"{100 * config['led_brightness'] / 255:.1f}", "%")
             )
-        table.add_section()
 
-        table.add_row("Voltage in", f"{values['V_in']:.1f}", "V")
+        table.append(("Voltage in", f"{values['V_in']:.1f}", "V"))
         if values["I_in"] is not None:
-            table.add_row("Current in", f"{values['I_in']:.2f}", "A")
-        table.add_row("Supercap voltage", f"{values['V_supercap']:.2f}", "V")
+            table.append(("Current in", f"{values['I_in']:.2f}", "A"))
+        table.append(("Supercap voltage", f"{values['V_supercap']:.2f}", "V"))
         if values["T_mcu"] is not None:
-            table.add_row("MCU temperature", f"{values['T_mcu'] - 273.15:.1f}", "°C")
+            table.append(("MCU temperature", f"{values['T_mcu'] - 273.15:.1f}", "°C"))
 
-        console.print(table)
+        keys, values, _ = zip(*table)
+        klen = len(max(keys, key=len))
+        vlen = len(max(values, key=len))
+        for key, val, unit in table:
+            print(f"{key:<{klen}}  {val:>{vlen}}  {unit}")
 
 
 @app.command("print")
@@ -99,11 +112,11 @@ def print_all() -> None:
 
 async def async_shutdown(socket_path: pathlib.Path) -> None:
     """Tell the device to wait for shutdown."""
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await post_json(session, "http://localhost:8080/shutdown", {})
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @app.command("shutdown")
@@ -115,11 +128,11 @@ def shutdown() -> None:
 async def async_sleep(socket_path: pathlib.Path, time: Dict[str, str]) -> None:
     """Tell the device to sleep."""
 
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await post_json(session, "http://localhost:8080/sleep", time)
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @app.command("sleep")
@@ -148,13 +161,13 @@ set_app = typer.Typer(help="Set configuration values.")
 
 async def async_set_watchdog(socket_path: pathlib.Path, timeout: float) -> None:
     """Set watchdog timeout in seconds. Value 0 disables the watchdog."""
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await put_json(
             session, "http://localhost:8080/config/watchdog_timeout", timeout
         )
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @set_app.command("watchdog")
@@ -169,13 +182,13 @@ async def async_set_power_on_threshold(
     socket_path: pathlib.Path, threshold: float
 ) -> None:
     """Set power-on threshold in volts."""
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await put_json(
             session, "http://localhost:8080/config/power_on_threshold", threshold
         )
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @set_app.command("power-on-threshold")
@@ -190,13 +203,13 @@ async def async_set_power_off_threshold(
     socket_path: pathlib.Path, threshold: float
 ) -> None:
     """Set power-off threshold in volts."""
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await put_json(
             session, "http://localhost:8080/config/power_off_threshold", threshold
         )
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @set_app.command("power-off-threshold")
@@ -212,13 +225,13 @@ async def async_set_led_brightness(
 ) -> None:
     """Set LED brightness in percent."""
     brightness_byte = int(brightness * 255 / 100)
-    connector = aiohttp.UnixConnector(path=str(socket_path))
-    async with aiohttp.ClientSession(connector=connector) as session:
+    connector = UnixConnector(path=str(socket_path))
+    async with ClientSession(connector=connector) as session:
         response = await put_json(
             session, "http://localhost:8080/config/led_brightness", brightness_byte
         )
         if response != 204:
-            console.print(f"Error: Received HTTP status {response}", style="red")
+            print_colored(f"Error: Received HTTP status {response}", color=Ansi.RED)
 
 
 @set_app.command("led")
