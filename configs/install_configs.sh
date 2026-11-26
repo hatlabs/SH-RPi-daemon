@@ -562,7 +562,7 @@ if [ $INSTALL_MCP2515 -eq 1 ]; then
 elif [ $UNINSTALL_MCP2515 -eq 1 ]; then
   if [ $VERSION -eq 1 ]; then
     echo "Disabling extra SPI channel and MCP2515 overlays"
-    disable_overlay mcp2515-can2,oscillator=16000000,interrupt=5,cs2=6 0
+    do_overlay mcp2515-can2,oscillator=16000000,interrupt=5,cs2=6 1
   else # not version 1
     echo "Disabling the MCP2515 overlay"
     disable_config_line "dtoverlay=mcp2515-can0,oscillator=16000000,interrupt=23" $CONFIG
